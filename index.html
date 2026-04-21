@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Maya — Giriş</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0b0c14;
+  --card:#13151f;
+  --border:#ffffff0f;
+  --accent:#ff6b35;
+  --accent2:#ffb347;
+  --text:#f0f0f5;
+  --muted:#5a5a7a;
+  --green:#2ed573;
+}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,#ff6b3518 0%,transparent 60%);
+  pointer-events:none;
+}
+.orb{
+  position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;
+  animation:drift 8s ease-in-out infinite alternate;
+}
+.orb1{width:300px;height:300px;background:#ff6b3520;top:-50px;left:-80px}
+.orb2{width:250px;height:250px;background:#7c3aff18;bottom:-60px;right:-60px;animation-delay:-4s}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(20px,30px)}}
+
+.wrap{
+  width:min(380px,94vw);
+  position:relative;z-index:1;
+}
+.logo{
+  font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;
+  text-align:center;margin-bottom:8px;letter-spacing:-1px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.tagline{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:32px;letter-spacing:.5px}
+
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:28px;
+  box-shadow:0 24px 60px #00000060;
+}
+.tabs{display:flex;gap:4px;background:#ffffff08;border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{
+  flex:1;padding:9px;border:none;background:transparent;
+  color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;
+  border-radius:7px;cursor:pointer;transition:all .2s;
+}
+.tab.active{background:var(--accent);color:#fff;font-weight:700;box-shadow:0 4px 14px #ff6b3540}
+
+label{display:block;font-size:.75rem;color:var(--muted);font-weight:500;margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+input[type=text],input[type=password]{
+  width:100%;padding:12px 14px;
+  background:#ffffff08;border:1px solid var(--border);
+  border-radius:10px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;
+  transition:border-color .2s;margin-bottom:16px;
+}
+input:focus{border-color:var(--accent)}
+input::placeholder{color:var(--muted)}
+
+.btn{
+  width:100%;padding:13px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+  cursor:pointer;transition:all .2s;letter-spacing:.5px;
+  box-shadow:0 8px 24px #ff6b3535;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px #ff6b3550}
+.btn:active{transform:scale(.97)}
+
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.divider span{color:var(--muted);font-size:.75rem}
+
+.auto-btn{
+  width:100%;padding:12px;border:1px solid var(--border);
+  border-radius:12px;background:transparent;color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:all .2s;
+}
+.auto-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.notice{
+  margin-top:16px;text-align:center;font-size:.75rem;color:var(--muted);
+  background:#ffffff05;border-radius:8px;padding:10px;border:1px solid var(--border);
+}
+.notice span{color:var(--green)}
+
+.err{color:#ff4757;font-size:.8rem;margin-top:-10px;margin-bottom:10px;display:none}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="wrap">
+  <div class="logo">🔥 Maya</div>
+  <p class="tagline">Oyun Platformu · Müzik · Söhbət</p>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Giriş</button>
+      <button class="tab" onclick="switchTab('register')">Qeydiyyat</button>
+    </div>
+
+    <div id="loginForm">
+      <label>İstifadəçi adı</label>
+      <input type="text" id="lUser" placeholder="adınız...">
+      <label>Şifrə</label>
+      <input type="password" id="lPass" placeholder="••••••">
+      <div class="err" id="lErr">İstifadəçi adı və ya şifrə yanlışdır.</div>
+      <button class="btn" onclick="doLogin()">Daxil Ol</button>
+      <div class="divider"><span>ya da</span></div>
+      <button class="auto-btn" onclick="doGuest()">⚡ Qonaq kimi davam et</button>
+    </div>
+
+    <div id="registerForm" style="display:none">
+      <label>İstifadəçi adı</label>
+      <input type="text" id="rUser" placeholder="unikal ad seçin..." maxlength="20">
+      <label>Şifrə</label>
+      <input type="password" id="rPass" placeholder="••••••" maxlength="30">
+      <div class="err" id="rErr">Bu istifadəçi adı mövcuddur.</div>
+      <button class="btn" onclick="doRegister()">Hesab Yarat</button>
+    </div>
+
+    <div class="notice">
+      <span>●</span> Hesabınız yoxdursa "Qonaq kimi davam et" düyməsi ilə avtomatik hesab yaradılır
+    </div>
+  </div>
+</div>
+<script>
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
+  document.getElementById('loginForm').style.display=t==='login'?'':'none';
+  document.getElementById('registerForm').style.display=t==='register'?'':'none';
+}
+
+function rndCode(){return Math.random().toString(36).substr(2,5).toUpperCase()}
+
+function getUsers(){try{return JSON.parse(localStorage.getItem('maya_users')||'{}')}catch{return{}}}
+function saveUsers(u){localStorage.setItem('maya_users',JSON.stringify(u))}
+function setSession(u){localStorage.setItem('maya_session',JSON.stringify(u))}
+
+function doLogin(){
+  const u=document.getElementById('lUser').value.trim();
+  const p=document.getElementById('lPass').value;
+  const err=document.getElementById('lErr');
+  const users=getUsers();
+  if(users[u]&&users[u].pass===btoa(p)){
+    setSession(users[u]);location.href='dashboard.html';
+  } else {
+    err.style.display='block';setTimeout(()=>err.style.display='none',3000);
+  }
+}
+
+function doRegister(){
+  const u=document.getElementById('rUser').value.trim();
+  const p=document.getElementById('rPass').value;
+  const err=document.getElementById('rErr');
+  if(!u||!p){return}
+  const users=getUsers();
+  if(users[u]){err.style.display='block';setTimeout(()=>err.style.display='none',3000);return}
+  const profile={id:'u_'+Date.now(),username:u,pass:btoa(p),code:rndCode(),avatar:'🦊',bio:'',coins:100,created:Date.now()};
+  users[u]=profile;saveUsers(users);setSession(profile);location.href='dashboard.html';
+}
+
+function doGuest(){
+  const id='g_'+Date.now();
+  const name='Qonaq'+Math.floor(Math.random()*9999);
+  const profile={id,username:name,pass:'',code:rndCode(),avatar:'👤',bio:'',coins:50,guest:true,created:Date.now()};
+  const users=getUsers();users[name]=profile;saveUsers(users);setSession(profile);location.href='dashboard.html';
+}
+
+// Enter key
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const f=document.getElementById('loginForm').style.display;f!=='none'?doLogin():doRegister()}});
+</script>
+</body>
+</html>
