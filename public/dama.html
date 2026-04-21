@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="az"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Dama</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#080810;--card:#10121e;--s:#1a1c28;--accent:#ff6b35;--a2:#ffb347;--text:#eeeef8;--muted:#5a5a80;--red:#ff4d6d;--cyan:#00d4ff;--green:#2ed573}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
+.shell{height:100dvh;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;overflow:auto}
+
+/* HEADER */
+.hdr{width:100%;max-width:500px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pcard{flex:1;background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:9px 12px;display:flex;align-items:center;gap:8px;position:relative;transition:.3s}
+.pcard.active{border-color:var(--accent);box-shadow:0 0 12px rgba(255,107,53,.25)}
+.pcard.active-b{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.2)}
+.pcard.waiting{opacity:.5}
+.pav{width:38px;height:38px;border-radius:50%;background:var(--s);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,.1)}
+.pav img{width:100%;height:100%;object-fit:cover}
+.pinfo{flex:1;min-width:0}
+.pname{font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcount{font-size:.68rem;color:var(--muted);margin-top:1px}
+.turn-pill{background:var(--s);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:6px 14px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--muted);text-align:center;white-space:nowrap;flex-shrink:0}
+.turn-pill.red{color:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(255,77,109,.3)}
+.turn-pill.blue{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.25)}
+
+/* BOARD */
+.bwrap{position:relative}
+#board{display:grid;grid-template-columns:repeat(8,1fr);width:min(380px,95vw);height:min(380px,95vw);border:2px solid var(--cyan);border-radius:4px;overflow:hidden;box-shadow:0 0 50px rgba(0,212,255,.12)}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .1s}
+.cell.light{background:#221540}.cell.dark{background:#0a051a}
+.cell.hl{background:#00ff8830!important}.cell.hcap{background:#ff4d6d40!important}
+.cell.lf{background:#ffcc0020!important}.cell.lt{background:#ffcc0030!important}
+.cell.hl::after,.cell.hcap::after{content:'';position:absolute;border-radius:50%;animation:dp 1s ease-in-out infinite}
+.cell.hl::after{width:34%;height:34%;background:#00ff88;opacity:.9;box-shadow:0 0 8px #00ff88}
+.cell.hcap::after{width:54%;height:54%;border:2px solid var(--red);box-shadow:0 0 12px var(--red)}
+@keyframes dp{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.piece{width:74%;height:74%;border-radius:50%;position:absolute;cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center;user-select:none}
+.pr{background:radial-gradient(circle at 35% 35%,#ff8099,#ff4d6d,#cc0033);border:2px solid #ff8099;box-shadow:0 2px 8px rgba(255,77,109,.6),inset 0 1px 2px rgba(255,255,255,.25)}
+.pb{background:radial-gradient(circle at 35% 35%,#4466aa,rgba(0,212,255,.15),#001a40);border:2px solid #00d4ff;box-shadow:0 2px 8px rgba(0,212,255,.5),inset 0 1px 2px rgba(255,255,255,.15)}
+.piece.sel{transform:scale(1.2) translateY(-4px);box-shadow:0 8px 28px rgba(255,204,0,.7)!important;border-color:gold!important}
+.piece:hover:not(.sel){transform:scale(1.07)}
+.king{font-size:.85em;position:absolute}
+
+/* WAITING */
+.wait-overlay{position:absolute;inset:0;background:rgba(8,8,16,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:4px;z-index:20}
+.wait-icon{font-size:3rem;animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.wait-txt{font-family:'Syne',sans-serif;font-size:.82rem;color:var(--muted);letter-spacing:1.5px}
+.wait-code{font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--accent);font-weight:800;letter-spacing:3px;cursor:pointer}
+
+/* WIN */
+.win-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.win-overlay.show{display:flex}
+.win-card{background:var(--card);border:2px solid gold;border-radius:22px;padding:36px 28px;text-align:center;box-shadow:0 0 60px rgba(255,204,0,.3);animation:pop .4s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes pop{from{transform:scale(.4)}to{transform:scale(1)}}
+.win-em{font-size:3.5rem;animation:spin 2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.win-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:gold;margin:.4rem 0}
+.win-btns{display:flex;gap:10px;margin-top:18px;justify-content:center}
+.wbtn{padding:10px 22px;border:none;border-radius:11px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:.2s;font-size:.88rem}
+.wbtn:active{transform:scale(.95)}
+.wbtn.p{background:var(--accent);color:#fff}
+.wbtn.s{background:var(--s);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+.toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:7px 16px;border-radius:20px;font-size:.76rem;font-weight:700;z-index:300;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hdr">
+    <div class="pcard" id="cr">
+      <div class="pav" id="avR">🦊</div>
+      <div class="pinfo"><div class="pname" id="nR">Qırmızı</div><div class="pcount">🔴 <span id="cR">12</span></div></div>
+    </div>
+    <div class="turn-pill red" id="tPill">SƏNIN SIRAN</div>
+    <div class="pcard" id="cb">
+      <div class="pinfo" style="text-align:right"><div class="pname" id="nB">Gözlənilir...</div><div class="pcount"><span id="cB">12</span> 🔵</div></div>
+      <div class="pav" id="avB">❓</div>
+    </div>
+  </div>
+  <div class="bwrap">
+    <div id="board"></div>
+    <div class="wait-overlay" id="waitOverlay">
+      <div class="wait-icon">♟️</div>
+      <div class="wait-txt">Rəqib gözlənilir...</div>
+      <div class="wait-code" onclick="copyCode()" id="roomCodeDisp">#—</div>
+      <div style="font-size:.7rem;color:var(--muted)">kodu kopyala</div>
+    </div>
+  </div>
+  <div id="statusMsg" style="font-size:.76rem;color:var(--muted);font-family:'Syne',sans-serif;letter-spacing:.8px;text-align:center;min-height:18px"></div>
+</div>
+
+<div class="win-overlay" id="winO">
+  <div class="win-card">
+    <div class="win-em" id="wEm">🏆</div>
+    <div class="win-title" id="wTitle">QAZANDIN!</div>
+    <div style="font-size:.82rem;color:var(--muted)" id="wSub">+50 XP qazandın!</div>
+    <div class="win-btns">
+      <button class="wbtn p" onclick="restartGame()">🔁 Yenidən</button>
+      <button class="wbtn s" onclick="parent.location.href='../dashboard.html'">🏠 Lobi</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const params=new URLSearchParams(location.search);
+const myId=params.get('uid')||'g_'+Date.now();
+const myName=decodeURIComponent(params.get('user')||'Oyunçu');
+const roomId=params.get('room')||'demo';
+const roomCode=params.get('code')||'—';
+const WS=decodeURIComponent(params.get('ws')||'wss://maya-platform.onrender.com');
+document.getElementById('roomCodeDisp').textContent='#'+roomCode;
+
+let socket=null,board=null,myColor=null,currentTurn=null,selected=null,gameOver=false,lastMove=null,botMode=false;
+let roomPlayers=[];
+
+/* ── INIT BOARD ── */
+function initBoard(){
+  const b=Array.from({length:8},()=>Array(8).fill(0));
+  for(let r=0;r<3;r++) for(let c=0;c<8;c++) if((r+c)%2===1) b[r][c]=3;
+  for(let r=5;r<8;r++) for(let c=0;c<8;c++) if((r+c)%2===1) b[r][c]=1;
+  return b;
+}
+
+/* ── RENDER ── */
+function renderBoard(){
+  const el=document.getElementById('board');el.innerHTML='';
+  if(!board) return;
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const cell=document.createElement('div');
+    cell.className='cell '+((r+c)%2===0?'light':'dark');
+    cell.dataset.r=r;cell.dataset.c=c;cell.onclick=()=>onCell(r,c);
+    if(lastMove){if(lastMove.from[0]===r&&lastMove.from[1]===c)cell.classList.add('lf');if(lastMove.to[0]===r&&lastMove.to[1]===c)cell.classList.add('lt')}
+    const p=board[r][c];
+    if(p){
+      const div=document.createElement('div');
+      div.className='piece '+(p===1||p===2?'pr':'pb');
+      if(selected&&selected[0]===r&&selected[1]===c) div.classList.add('sel');
+      if(p===2||p===4) div.innerHTML='<span class="king">👑</span>';
+      cell.appendChild(div);
+    }
+    el.appendChild(cell);
+  }
+  updateCount();updateTurnUI();
+}
+function cell(r,c){return document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`)}
+function clearHL(){document.querySelectorAll('.cell').forEach(e=>e.classList.remove('hl','hcap'))}
+function updateCount(){let r=0,b=0;for(let i=0;i<8;i++)for(let j=0;j<8;j++){if(board[i][j]===1||board[i][j]===2)r++;if(board[i][j]===3||board[i][j]===4)b++}document.getElementById('cR').textContent=r;document.getElementById('cB').textContent=b}
+function updateTurnUI(){
+  const pill=document.getElementById('tPill');
+  const cr=document.getElementById('cr'),cb=document.getElementById('cb');
+  const myTurn=currentTurn===myColor;
+  if(currentTurn==='red'){pill.className='turn-pill red';pill.textContent=myTurn?'SƏNIN SIRAN':'Qırmızı oynayır';cr.classList.add('active');cr.classList.remove('active-b');cb.classList.remove('active','active-b')}
+  else{pill.className='turn-pill blue';pill.textContent=myTurn?'SƏNIN SIRAN':'Mavi oynayır';cb.classList.add('active','active-b');cr.classList.remove('active','active-b')}
+  if(botMode&&currentTurn!==myColor) document.getElementById('statusMsg').textContent='🤖 Bot düşünür...';
+  else document.getElementById('statusMsg').textContent='';
+}
+
+/* ── LEGAL MOVES ── */
+function legalMoves(b,color){
+  const mine=color==='red'?[1,2]:[3,4];const all=[];
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(mine.includes(b[r][c])) all.push(...pMoves(b,r,c));
+  const caps=all.filter(m=>m.caps.length>0);return caps.length?caps:all;
+}
+function pMoves(b,r,c){
+  const p=b[r][c];if(!p) return[];
+  const isR=p===1||p===2,isK=p===2||p===4;
+  const dirs=isK?[[-1,-1],[-1,1],[1,-1],[1,1]]:(isR?[[-1,-1],[-1,1]]:[[1,-1],[1,1]]);
+  const res=[];
+  for(const[dr,dc]of dirs){
+    const nr=r+dr,nc=c+dc;if(nr<0||nr>7||nc<0||nc>7)continue;
+    if(!b[nr][nc]){res.push({from:[r,c],to:[nr,nc],caps:[]});continue}
+    const ep=b[nr][nc],en=(isR&&(ep===3||ep===4))||(!isR&&(ep===1||ep===2));
+    if(en){const jr=nr+dr,jc=nc+dc;if(jr>=0&&jr<=7&&jc>=0&&jc<=7&&!b[jr][jc])res.push({from:[r,c],to:[jr,jc],caps:[[nr,nc]]})}
+  }return res;
+}
+function applyMove(b,move){
+  const nb=b.map(r=>[...r]);const[fr,fc]=move.from,[tr,tc]=move.to;
+  nb[tr][tc]=nb[fr][fc];nb[fr][fc]=0;
+  move.caps.forEach(([cr,cc])=>{nb[cr][cc]=0});
+  if(nb[tr][tc]===1&&tr===0)nb[tr][tc]=2;if(nb[tr][tc]===3&&tr===7)nb[tr][tc]=4;return nb;
+}
+function checkWinner(b){let r=0,bk=0;for(let i=0;i<8;i++)for(let j=0;j<8;j++){if(b[i][j]===1||b[i][j]===2)r++;if(b[i][j]===3||b[i][j]===4)bk++}if(!r)return'black';if(!bk)return'red';return null}
+
+/* ── CLICK ── */
+function onCell(r,c){
+  if(gameOver||currentTurn!==myColor||!board) return;
+  const p=board[r][c];
+  const isMinePiece=(myColor==='red'&&(p===1||p===2))||(myColor==='black'&&(p===3||p===4));
+  if(isMinePiece){
+    selected=[r,c];clearHL();renderBoard();
+    if(socket?.connected){
+      socket.emit('dama_legal',{row:r,col:c,room_id:roomId},res=>{res?.moves?.forEach(m=>{const el=cell(m.to[0],m.to[1]);if(el)el.classList.add(m.caps.length?'hcap':'hl')})});
+    } else {
+      legalMoves(board,myColor).filter(m=>m.from[0]===r&&m.from[1]===c).forEach(m=>{const el=cell(m.to[0],m.to[1]);if(el)el.classList.add(m.caps.length?'hcap':'hl')});
+    }
+    return;
+  }
+  if(selected){
+    if(socket?.connected){
+      socket.emit('dama_move',{from:selected,to:[r,c],room_id:roomId},res=>{
+        if(!res?.ok) toast('❌ Qanuni olmayan hərəkət!');
+      });
+    } else {
+      const legal=legalMoves(board,myColor);
+      const move=legal.find(m=>m.from[0]===selected[0]&&m.from[1]===selected[1]&&m.to[0]===r&&m.to[1]===c);
+      if(move){
+        board=applyMove(board,move);lastMove=move;selected=null;clearHL();
+        currentTurn=myColor==='red'?'black':'red';renderBoard();
+        const w=checkWinner(board);if(w){endGame(w);return}
+        if(botMode) setTimeout(botMoveLocal,600);
+      } else {selected=null;clearHL();renderBoard()}
+    }
+  }
+}
+
+function botMoveLocal(){
+  if(gameOver) return;
+  const botColor=myColor==='red'?'black':'red';
+  const moves=legalMoves(board,botColor);if(!moves.length){endGame(myColor);return}
+  const caps=moves.filter(m=>m.caps.length>0);
+  const move=(caps.length?caps:moves)[Math.floor(Math.random()*(caps.length?caps:moves).length)];
+  board=applyMove(board,move);lastMove=move;currentTurn=myColor;renderBoard();
+  const w=checkWinner(board);if(w) endGame(w);
+}
+
+function endGame(winner){
+  gameOver=true;
+  const isWin=winner===myColor;
+  document.getElementById('wEm').textContent=isWin?'🏆':'💀';
+  document.getElementById('wTitle').textContent=isWin?'QAZANDIN! 🎉':'KAYBETTİN';
+  document.getElementById('wSub').textContent=isWin?'+50 XP qazandın!':'Növbəti dəfə daha yaxşı!';
+  document.getElementById('winO').classList.add('show');
+}
+function restartGame(){board=initBoard();selected=null;currentTurn='red';gameOver=false;lastMove=null;document.getElementById('winO').classList.remove('show');renderBoard()}
+
+/* ── SOCKET ── */
+function connectWS(){
+  socket=io(WS,{transports:['websocket','polling']});
+  socket.on('connect',()=>{
+    socket.emit('auth',{id:myId,display_name:myName});
+    setTimeout(()=>{socket.emit('join_room',{room_id:roomId},()=>{})},300);
+  });
+  socket.on('state',d=>{
+    const pl=d.players||[];roomPlayers=pl;
+    const me=pl.find(p=>p.id===myId);
+    document.getElementById('waitOverlay').style.display=pl.length<2?'flex':'none';
+    if(pl.length>=2){
+      const p1=pl[0],p2=pl[1];
+      document.getElementById('nR').textContent=p1.display_name||'?';
+      document.getElementById('nB').textContent=p2.display_name||'?';
+      const av1=p1.photo?`<img src="${p1.photo}">`:(p1.avatar||'🦊');
+      const av2=p2.photo?`<img src="${p2.photo}">`:(p2.avatar||'❓');
+      document.getElementById('avR').innerHTML=av1;document.getElementById('avB').innerHTML=av2;
+    }
+    if(d.room?.turn_color) currentTurn=d.room.turn_color;
+    if(d.room?.board) board=d.room.board;
+    if(board) renderBoard();
+  });
+  socket.on('game_start',d=>{
+    board=d.board;currentTurn=d.turn;
+    myColor=d.colors?.[myId]||'red';
+    document.getElementById('waitOverlay').style.display='none';
+    document.getElementById('nR').textContent=d.names?.red||'Qırmızı';
+    document.getElementById('nB').textContent=d.names?.black||'Mavi';
+    renderBoard();toast('♟️ Oyun başladı!');
+  });
+  socket.on('board_update',d=>{
+    board=d.board;currentTurn=d.turn;lastMove=d.last_move;selected=null;clearHL();renderBoard();
+  });
+  socket.on('game_end',d=>{endGame(d.winner)});
+  socket.on('connect_error',()=>{
+    toast('⚡ Demo: bota qarşı oynayırsınız');
+    board=initBoard();myColor='red';currentTurn='red';botMode=true;
+    document.getElementById('nR').textContent=myName;document.getElementById('nB').textContent='🤖 Bot';
+    document.getElementById('avB').innerHTML='🤖';
+    document.getElementById('waitOverlay').style.display='none';renderBoard();
+  });
+}
+
+// Listen from parent shell
+window.addEventListener('message',e=>{
+  if(!e.data||typeof e.data!=='object') return;
+  const d=e.data;
+  if(d._event==='board_update'){board=d.board;currentTurn=d.turn;lastMove=d.last_move;selected=null;clearHL();renderBoard()}
+  if(d._event==='game_start'){board=d.board;currentTurn=d.turn;myColor=d.colors?.[myId]||'red';document.getElementById('waitOverlay').style.display='none';renderBoard()}
+  if(d._event==='game_end') endGame(d.winner);
+  if(d._event==='state'&&d.room?.board){board=d.room.board;currentTurn=d.room.turn_color;renderBoard()}
+});
+
+function copyCode(){navigator.clipboard?.writeText(roomCode).then(()=>toast('📋 Kod kopyalandı!')).catch(()=>toast('Kod: '+roomCode))}
+let _tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2200)}
+
+connectWS();
+</script>
+</body></html>

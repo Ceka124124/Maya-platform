@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="az"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>UNO</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0008;--card:#130010;--s:#1e0018;--accent:#ff6b35;--text:#fff0f8;--muted:#6a4a70;--green:#2ed573}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
+.shell{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+/* OPPONENT AREA */
+.opp-area{display:flex;gap:6px;padding:8px 10px;overflow-x:auto;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);scrollbar-width:none}
+.opp-area::-webkit-scrollbar{display:none}
+.opp-chip{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:50px}
+.opp-av{width:38px;height:38px;border-radius:10px;background:var(--s);display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:2px solid rgba(255,255,255,.1);overflow:hidden;transition:.3s}
+.opp-av img{width:100%;height:100%;object-fit:cover}
+.opp-av.active-t{border-color:gold;box-shadow:0 0 10px rgba(255,215,0,.5)}
+.opp-name{font-size:.62rem;color:var(--muted);max-width:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.opp-cnt{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;color:var(--text)}
+.uno-shout{background:#ff1744;color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:4px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* CENTER */
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px;position:relative}
+.color-indicator{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);transition:.4s}
+.pile-row{display:flex;align-items:center;gap:20px}
+.deck-pile{width:60px;height:90px;border-radius:10px;background:radial-gradient(circle at 40% 40%,#2a1a3a,#0d0015);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:rgba(255,255,255,.4);box-shadow:3px 3px 0 rgba(0,0,0,.4);position:relative}
+.deck-pile:active{transform:scale(.95)}
+.deck-pile .cnt{position:absolute;bottom:4px;font-size:.65rem;color:rgba(255,255,255,.4)}
+.discard-pile{width:68px;height:100px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.25);transition:.3s;cursor:default}
+.turn-txt{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-align:center}
+.turn-txt.myturn{color:gold;animation:glow 1.2s ease-in-out infinite alternate}
+@keyframes glow{from{text-shadow:0 0 8px gold}to{text-shadow:0 0 20px gold}}
+/* COLOR CHOOSER */
+.color-chooser{display:flex;gap:10px;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.col-btn{width:52px;height:52px;border-radius:50%;cursor:pointer;border:3px solid rgba(255,255,255,.3);transition:.2s;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.col-btn:active{transform:scale(.9)}
+/* HAND */
+.hand-area{flex-shrink:0;overflow:hidden;padding:10px 10px 14px;background:var(--card);border-top:1px solid rgba(255,255,255,.06)}
+.hand-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 2px;scrollbar-width:none}
+.hand-scroll::-webkit-scrollbar{display:none}
+.uno-card{width:58px;height:86px;border-radius:10px;border:2px solid rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 4px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;transition:transform .15s,box-shadow .15s;flex-shrink:0;position:relative;box-shadow:2px 3px 0 rgba(0,0,0,.4);user-select:none}
+.uno-card:active{transform:translateY(-12px) scale(1.05)}
+.uno-card.playable:hover{transform:translateY(-8px);box-shadow:0 12px 24px rgba(0,0,0,.5)}
+.uno-card.unplayable{opacity:.5;cursor:default}
+.uno-card.unplayable:active{transform:none}
+.card-val{font-size:1.1rem;line-height:1}
+.card-mid{font-size:1.5rem}
+.c-red{background:radial-gradient(circle at 40% 30%,#ff6688,#cc0033)}.c-green{background:radial-gradient(circle at 40% 30%,#66ff88,#006622)}.c-blue{background:radial-gradient(circle at 40% 30%,#6688ff,#002299)}.c-yellow{background:radial-gradient(circle at 40% 30%,#ffff66,#cc8800)}.c-wild{background:radial-gradient(circle at 40% 30%,#333,#111)}
+/* WIN */
+.win-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.win-overlay.show{display:flex}
+.win-card{background:var(--card);border:2px solid gold;border-radius:20px;padding:32px 28px;text-align:center;box-shadow:0 0 50px rgba(255,204,0,.3);animation:pop .4s ease}
+.win-em{font-size:3rem;animation:spin 2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.win-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:gold;margin:.4rem 0}
+.wbtn{padding:10px 22px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;margin-top:14px;font-size:.9rem}
+.toast{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:6px 14px;border-radius:16px;font-size:.76rem;font-weight:700;z-index:300;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap}
+.toast.show{opacity:1}
+/* Waiting */
+.wait-screen{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.wait-screen.hidden{display:none}
+.ws-icon{font-size:4rem;animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.ws-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800}
+.ws-code{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:900;color:var(--accent);letter-spacing:4px;cursor:pointer}
+.ws-sub{font-size:.78rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wait-screen" id="waitScr">
+  <div class="ws-icon">🃏</div>
+  <div class="ws-title">UNO Oyunu</div>
+  <div class="ws-code" onclick="copyCode()" id="wsCode">#—</div>
+  <div class="ws-sub">Bu kodu arkadaşınla paylaş · En az 2 oyunçu lazım</div>
+  <div style="font-size:.76rem;color:var(--muted);margin-top:8px" id="wsStatus">Bağlanılır...</div>
+</div>
+<div class="shell" id="gameShell" style="display:none">
+  <div class="opp-area" id="oppArea"></div>
+  <div class="center" id="center">
+    <div class="pile-row">
+      <div class="deck-pile" onclick="drawCard()">🂠<div class="cnt" id="deckCnt">52</div></div>
+      <div class="discard-pile c-wild" id="topCard">🂱</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="color-indicator" id="colorInd" style="background:#888"></div>
+      <div class="turn-txt" id="turnTxt">Yüklənir...</div>
+    </div>
+    <div class="color-chooser" id="colorChooser" style="display:none">
+      <div class="col-btn" style="background:#cc0033" onclick="chooseColor('red')">🔴</div>
+      <div class="col-btn" style="background:#006622" onclick="chooseColor('green')">🟢</div>
+      <div class="col-btn" style="background:#002299" onclick="chooseColor('blue')">🔵</div>
+      <div class="col-btn" style="background:#cc8800" onclick="chooseColor('yellow')">🟡</div>
+    </div>
+  </div>
+  <div class="hand-area">
+    <div class="hand-scroll" id="handScroll"></div>
+  </div>
+</div>
+<div class="win-overlay" id="winO">
+  <div class="win-card">
+    <div class="win-em" id="wEm">🏆</div>
+    <div class="win-title" id="wTitle">QAZANDIN!</div>
+    <div style="font-size:.82rem;color:var(--muted)" id="wSub">+60 XP!</div>
+    <button class="wbtn" onclick="parent.location.href='../dashboard.html'">🏠 Lobi</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const prm=new URLSearchParams(location.search);
+const myId=prm.get('uid')||'g_'+Date.now();
+const myName=decodeURIComponent(prm.get('user')||'Oyunçu');
+const roomId=prm.get('room')||'demo';
+const roomCode=prm.get('code')||'—';
+const WS=decodeURIComponent(prm.get('ws')||'wss://maya-platform.onrender.com');
+document.getElementById('wsCode').textContent='#'+roomCode;
+
+const COL_CSS={red:'c-red',green:'c-green',blue:'c-blue',yellow:'c-yellow',wild:'c-wild'};
+const COL_BG={red:'#cc0033',green:'#006622',blue:'#002299',yellow:'#cc8800',wild:'#222'};
+const VAL_EMOJI={skip:'⏭',reverse:'🔄','+2':'+2','+4':'+4','wild':'🌈'};
+
+let socket=null,myHand=[],currentTurn=null,topCard=null,currentColor=null,pendingWild=null,gameStarted=false,opponents={};
+
+function connectWS(){
+  socket=io(WS,{transports:['websocket','polling']});
+  socket.on('connect',()=>{
+    socket.emit('auth',{id:myId,display_name:myName});
+    document.getElementById('wsStatus').textContent='Otağa qoşulunur...';
+    setTimeout(()=>{socket.emit('join_room',{room_id:roomId},res=>{
+      if(res?.ok) document.getElementById('wsStatus').textContent='Oyunçular gözlənilir ('+(res.players||1)+'/2+)...';
+      else toast('❌ '+(res?.e||'Xəta'));
+    })},300);
+  });
+  socket.on('state',d=>{
+    const pl=d.players||[];
+    document.getElementById('wsStatus').textContent=pl.length+' oyunçu · gözlənilir...';
+  });
+  socket.on('uno_start',d=>{
+    gameStarted=true;myHand=d.hand||[];currentTurn=d.turn;topCard=d.top;currentColor=d.current_color||d.top?.col;
+    document.getElementById('waitScr').classList.add('hidden');
+    document.getElementById('gameShell').style.display='flex';
+    renderAll();toast('🃏 UNO başladı!');
+  });
+  socket.on('uno_hand',d=>{if(d.uid===myId){myHand=d.hand||[];renderHand()}});
+  socket.on('uno_update',d=>{topCard=d.top;currentColor=d.current_color;currentTurn=d.turn;renderTop();renderOpp(d.hand_counts);updateTurnUI();if(d.winner)showWin(d.winner===myId)});
+  socket.on('state',d=>{
+    if(!gameStarted) return;
+    const pl=d.players||[];
+    const opps=pl.filter(p=>p.id!==myId);
+    renderOppChips(opps,d.room?.current_turn);
+  });
+  socket.on('game_end',d=>{showWin(d.winner_id===myId)});
+  socket.on('connect_error',()=>{
+    toast('⚡ Server yoxdur - demo mode');
+    // Demo: start solo
+    myHand=demoHand();currentTurn=myId;topCard={col:'red',val:'5'};currentColor='red';
+    document.getElementById('waitScr').classList.add('hidden');
+    document.getElementById('gameShell').style.display='flex';
+    renderAll();
+  });
+}
+
+function demoHand(){
+  const cols=['red','green','blue','yellow'];const vals=['0','1','2','3','4','5','6','7','8','9','skip','reverse','+2'];
+  const h=[];for(let i=0;i<7;i++)h.push({col:cols[Math.floor(Math.random()*4)],val:vals[Math.floor(Math.random()*vals.length)]});
+  h.push({col:'wild',val:'wild'});return h;
+}
+
+function renderAll(){renderTop();renderHand();updateTurnUI()}
+
+function renderTop(){
+  const el=document.getElementById('topCard');
+  if(!topCard){return}
+  el.className='discard-pile '+COL_CSS[currentColor||topCard.col||'wild'];
+  el.textContent=VAL_EMOJI[topCard.val]||topCard.val;
+  document.getElementById('colorInd').style.background=COL_BG[currentColor||topCard.col]||'#888';
+}
+
+function renderHand(){
+  const sc=document.getElementById('handScroll');
+  sc.innerHTML='';
+  myHand.forEach((card,i)=>{
+    const playable=currentTurn===myId&&canPlay(card);
+    const div=document.createElement('div');
+    div.className='uno-card '+(COL_CSS[card.col]||'c-wild')+' '+(playable?'playable':'unplayable');
+    const sym=VAL_EMOJI[card.val]||card.val;
+    div.innerHTML=`<div class="card-val">${sym}</div><div class="card-mid">${card.col==='wild'?'🌈':sym}</div><div class="card-val">${sym}</div>`;
+    if(playable) div.onclick=()=>playCard(card,i);
+    sc.appendChild(div);
+  });
+}
+
+function canPlay(card){
+  if(!topCard) return true;
+  if(card.col==='wild') return true;
+  if(card.col===currentColor) return true;
+  if(card.val===topCard.val) return true;
+  return false;
+}
+
+function playCard(card,idx){
+  if(currentTurn!==myId){toast('⏳ Sıra sizdə deyil!');return}
+  if(!canPlay(card)){toast('❌ Bu kartı oynaya bilməzsiniz');return}
+  if(card.col==='wild'){pendingWild=card;document.getElementById('colorChooser').style.display='flex';return}
+  sendPlay(card,null);
+}
+function chooseColor(col){
+  document.getElementById('colorChooser').style.display='none';
+  if(pendingWild){sendPlay(pendingWild,col);pendingWild=null}
+}
+function sendPlay(card,chosenColor){
+  if(socket?.connected){
+    socket.emit('uno_play',{card,chosen_color:chosenColor,room_id:roomId},res=>{
+      if(!res?.ok) toast('❌ '+(res?.e||'Xəta'));
+    });
+  } else {
+    // Demo local
+    myHand.splice(myHand.indexOf(card),1);
+    topCard=card;currentColor=chosenColor||card.col;
+    if(myHand.length===0){showWin(true);return}
+    renderAll();toast('Oynandı!');
+  }
+}
+function drawCard(){
+  if(currentTurn!==myId){toast('⏳ Sıra sizdə deyil!');return}
+  if(socket?.connected){socket.emit('uno_draw',{room_id:roomId},res=>{if(res?.hand)myHand=res.hand;renderHand()})}
+  else{
+    const cols=['red','green','blue','yellow'],vals=['0','1','2','3','4','5','6'];
+    myHand.push({col:cols[Math.floor(Math.random()*4)],val:vals[Math.floor(Math.random()*vals.length)]});
+    currentTurn=myId==='p1'?'p2':'p1';renderHand();updateTurnUI();
+  }
+}
+
+function renderOppChips(opps,turn){
+  const area=document.getElementById('oppArea');area.innerHTML='';
+  opps.forEach(p=>{
+    const div=document.createElement('div');div.className='opp-chip';
+    const av=p.photo?`<img src="${p.photo}">`:(p.avatar||'👤');
+    div.innerHTML=`<div class="opp-av${p.id===turn?' active-t':''}">${av}</div><div class="opp-name">${esc(p.display_name||'?')}</div><div class="opp-cnt">${opponents[p.id]||'?'}🃏</div>`;
+    area.appendChild(div);
+  });
+}
+function renderOpp(counts){opponents=counts||{};renderAll()}
+
+function updateTurnUI(){
+  const tt=document.getElementById('turnTxt');
+  if(currentTurn===myId){tt.className='turn-txt myturn';tt.textContent='🟡 SENİN SIRAN - OYN!'}
+  else{tt.className='turn-txt';tt.textContent='⏳ Rəqib oynayır...'}
+  renderHand();
+}
+function showWin(isWin){
+  document.getElementById('wEm').textContent=isWin?'🏆':'💀';
+  document.getElementById('wTitle').textContent=isWin?'QAZANDIN!':'KAYBETTİN';
+  document.getElementById('wSub').textContent=isWin?'+60 XP qazandın!':'Növbəti dəfə!';
+  document.getElementById('winO').classList.add('show');
+}
+function copyCode(){navigator.clipboard?.writeText(roomCode).then(()=>toast('📋 Kopyalandı!')).catch(()=>toast('Kod: '+roomCode))}
+let _tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2200)}
+function esc(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+window.addEventListener('message',e=>{
+  if(!e.data||typeof e.data!=='object')return;const d=e.data;
+  if(d._event==='uno_start'){gameStarted=true;myHand=d.hand||[];currentTurn=d.turn;topCard=d.top;currentColor=d.current_color;document.getElementById('waitScr').classList.add('hidden');document.getElementById('gameShell').style.display='flex';renderAll()}
+  if(d._event==='uno_hand'&&d.uid===myId){myHand=d.hand||[];renderHand()}
+  if(d._event==='uno_update'){topCard=d.top;currentColor=d.current_color;currentTurn=d.turn;renderTop();updateTurnUI();if(d.winner)showWin(d.winner===myId)}
+  if(d._event==='game_end') showWin(d.winner_id===myId);
+});
+connectWS();
+</script>
+</body></html>

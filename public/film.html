@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="az"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Film Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#0b0c14;--card:#13151f;--accent:#ff6b35;--text:#f0f0f5;--muted:#5a5a7a;--green:#2ed573}html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+.shell{height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px}
+.t{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#ffb347,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.q-card{background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:20px;max-width:340px;width:100%}
+.q-num{font-size:.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.q-text{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;transition:.2s;font-size:.88rem}
+.opt:hover{border-color:var(--accent);background:rgba(255,107,53,.1)}
+.opt.correct{border-color:var(--green);background:rgba(46,213,115,.15);color:var(--green)}
+.opt.wrong{border-color:#ff4757;background:rgba(255,71,87,.15);color:#ff4757}
+.score{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent)}
+</style></head>
+<body><div class="shell">
+<div class="t">🎬 Film Quiz</div>
+<div class="score" id="score">Xal: 0</div>
+<div class="q-card" id="qCard">
+  <div class="q-num" id="qNum">Sual 1/5</div>
+  <div class="q-text" id="qText">Yüklənir...</div>
+  <div class="opts" id="opts"></div>
+</div>
+</div>
+<script>
+const QS=[
+  {q:'Titanik filmini kim rejissyorluq edib?',opts:['James Cameron','Steven Spielberg','Christopher Nolan','Ridley Scott'],ans:0},
+  {q:'Avatar filminin nə zaman çıxıb?',opts:['2007','2009','2011','2005'],ans:1},
+  {q:'Hanı Qotur filmindəki baş aktyor kimdir?',opts:['Will Smith','Tom Hanks','Robert De Niro','Leonardo DiCaprio'],ans:1},
+  {q:'Inception filminin rejissyoru kimdir?',opts:['Steven Spielberg','James Cameron','Christopher Nolan','Quentin Tarantino'],ans:2},
+  {q:'The Dark Knight filmindəki Joker-i kim canlandırıb?',opts:['Jack Nicholson','Heath Ledger','Jared Leto','Joaquin Phoenix'],ans:1},
+];
+let cur=0,score=0;
+function render(){
+  if(cur>=QS.length){document.getElementById('qCard').innerHTML=`<div style="text-align:center;padding:20px"><div style="font-size:3rem">🏆</div><div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin:10px 0;color:#ffb347">Bitdi!</div><div style="color:#5a5a7a">Xalınız: ${score}/${QS.length}</div></div>`;return}
+  const q=QS[cur];
+  document.getElementById('qNum').textContent=`Sual ${cur+1}/${QS.length}`;
+  document.getElementById('qText').textContent=q.q;
+  const o=document.getElementById('opts');o.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const d=document.createElement('div');d.className='opt';d.textContent=opt;
+    d.onclick=()=>{
+      o.querySelectorAll('.opt').forEach(el=>el.style.pointerEvents='none');
+      d.classList.add(i===q.ans?'correct':'wrong');
+      if(i===q.ans){score++;document.getElementById('score').textContent='Xal: '+score}
+      setTimeout(()=>{cur++;render()},900);
+    };
+    o.appendChild(d);
+  });
+}
+render();
+</script></body></html>

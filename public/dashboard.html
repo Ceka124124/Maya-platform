@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Maya — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#080810;--card:#10121e;--card2:#181a2a;--border:#ffffff0c;--border2:#ffffff15;--accent:#ff6b35;--a2:#ffb347;--a3:#ff3d71;--text:#eeeef8;--muted:#5a5a80;--green:#2ed573;--cyan:#00c8ff}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,107,53,.07),transparent 60%);pointer-events:none;z-index:0}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-r{display:flex;align-items:center;gap:10px}
+.coins-badge{background:linear-gradient(135deg,#ffb347,#ff8c00);color:#fff;padding:5px 12px;border-radius:99px;font-size:.78rem;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer}
+.av-btn{width:38px;height:38px;border-radius:50%;background:var(--card2);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;transition:.2s;overflow:hidden}
+.av-btn img{width:100%;height:100%;object-fit:cover}
+.av-btn:active{transform:scale(.9)}
+
+/* MAIN */
+main{max-width:480px;margin:0 auto;padding:16px 12px 96px;position:relative;z-index:1}
+
+/* PROFILE STRIP */
+.profile-strip{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:18px;position:relative;overflow:hidden;cursor:pointer;transition:.2s}
+.profile-strip:hover{border-color:rgba(255,107,53,.3)}
+.profile-strip::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--a2),var(--a3))}
+.p-av{width:56px;height:56px;border-radius:14px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px solid var(--border2);flex-shrink:0;overflow:hidden}
+.p-av img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.p-info{flex:1;min-width:0}
+.p-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-meta{font-size:.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px}
+.p-meta span{display:flex;align-items:center;gap:3px}
+.p-code{font-size:.7rem;color:var(--accent);font-weight:700;background:rgba(255,107,53,.1);padding:2px 8px;border-radius:99px}
+.lvl-bar{height:3px;background:var(--border);border-radius:99px;margin-top:6px;flex:1}
+.lvl-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--a2));border-radius:99px;transition:.5s}
+.edit-icon{color:var(--muted);font-size:.9rem;flex-shrink:0}
+
+/* SECTION */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px}
+.sec-title{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.sec-action{font-size:.78rem;color:var(--accent);cursor:pointer;font-weight:600}
+
+/* GAME MODES */
+.modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.mode-card{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:16px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.mode-card:hover{transform:translateY(-2px);border-color:rgba(255,107,53,.35);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.mode-card:active{transform:scale(.97)}
+.mode-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,53,.05),transparent);opacity:0;transition:.2s}
+.mode-card:hover::before{opacity:1}
+.mode-icon{font-size:2.2rem;margin-bottom:8px;display:block}
+.mode-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem}
+.mode-desc{font-size:.7rem;color:var(--muted);margin-top:3px;line-height:1.4}
+.mode-badge{position:absolute;top:8px;right:8px;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:99px}
+.badge-hot{background:#ff4757;color:#fff}
+.badge-new{background:var(--green);color:#000}
+.badge-live{background:var(--cyan);color:#000}
+
+/* ONLINE COUNTER */
+.online-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:.8rem}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.online-bar .info{color:var(--muted);flex:1}
+.online-bar .num{font-family:'Syne',sans-serif;font-weight:700;color:var(--green)}
+
+/* CREATE BTN */
+.create-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:.2s;box-shadow:0 4px 18px rgba(255,107,53,.3)}
+.create-btn:active{transform:scale(.95)}
+
+/* ROOMS */
+.room-list{display:flex;flex-direction:column;gap:8px}
+.room-item{background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.2s}
+.room-item:hover{border-color:rgba(255,107,53,.25);background:var(--card2)}
+.room-item:active{transform:scale(.98)}
+.room-mode-icon{width:44px;height:44px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0}
+.room-info{flex:1;min-width:0}
+.room-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-meta{font-size:.7rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px}
+.room-cnt{display:flex;align-items:center;gap:4px;font-size:.75rem;color:var(--muted);background:var(--card2);padding:4px 10px;border-radius:99px;flex-shrink:0;white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+.empty{text-align:center;padding:30px;color:var(--muted);font-size:.85rem}
+
+/* LEADERBOARD MINI */
+.lb-mini{display:flex;flex-direction:column;gap:6px}
+.lb-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:9px 12px}
+.lb-rank{font-size:1.1rem;width:26px;flex-shrink:0;text-align:center}
+.lb-av{width:32px;height:32px;border-radius:8px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;overflow:hidden}
+.lb-av img{width:100%;height:100%;object-fit:cover}
+.lb-name{flex:1;font-size:.85rem;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-xp{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--a2)}
+
+/* MODAL SHEET */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.25s}
+.modal-bg.show{opacity:1;pointer-events:all}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;width:min(480px,100%);padding:0 20px 36px;border-top:1px solid var(--border2);transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.9,.4,1);max-height:90dvh;overflow-y:auto}
+.modal-bg.show .sheet{transform:none}
+.sheet-handle{width:40px;height:4px;background:var(--border2);border-radius:99px;margin:14px auto 20px}
+.sheet-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:18px}
+
+/* FORM ELEMENTS */
+.flabel{display:block;font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin:0 0 6px 2px}
+.finput{width:100%;padding:12px 14px;background:#ffffff07;border:1px solid var(--border2);border-radius:11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:.2s;margin-bottom:14px}
+.finput:focus{border-color:var(--accent)}
+.finput::placeholder{color:var(--muted)}
+
+/* GAME SELECT */
+.game-select{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.gs-opt{background:#ffffff06;border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:.2s}
+.gs-opt.sel{border-color:var(--accent);background:rgba(255,107,53,.08)}
+.gs-opt .gi{font-size:1.5rem}
+.gs-opt .gn{font-size:.68rem;color:var(--muted);margin-top:3px;font-weight:500}
+.gs-opt.sel .gn{color:var(--accent)}
+
+/* AVATAR PICKER */
+.av-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.av-opt{width:46px;height:46px;border-radius:10px;background:#ffffff07;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;border:2px solid var(--border);transition:.2s}
+.av-opt.sel{border-color:var(--accent);background:rgba(255,107,53,.1)}
+
+/* BTN */
+.btn-main{width:100%;padding:13px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:.2s;box-shadow:0 8px 24px rgba(255,107,53,.3)}
+.btn-main:active{transform:scale(.97)}
+.btn-sec{width:100%;padding:12px;border:1px solid var(--border2);border-radius:13px;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:.2s;margin-top:8px}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent)}
+
+/* UPLOAD */
+.upload-area{border:1px dashed var(--border2);border-radius:11px;padding:14px;text-align:center;cursor:pointer;font-size:.8rem;color:var(--muted);transition:.2s;margin-bottom:14px}
+.upload-area:hover{border-color:var(--accent);color:var(--accent)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:rgba(8,8,16,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:10px 0 max(16px,env(safe-area-inset-bottom));z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:.62rem;cursor:pointer;transition:.2s;padding:4px 16px;border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.nav-btn i{font-size:1.2rem}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.active i{filter:drop-shadow(0 0 6px var(--accent))}
+
+/* TOAST */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-6px);background:var(--card2);border:1px solid var(--border2);border-radius:99px;padding:8px 18px;font-size:.8rem;color:var(--text);z-index:999;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">🔥 Maya</div>
+  <div class="topbar-r">
+    <div class="coins-badge" onclick="toast('💰 Mağaza tezliklə!')">🪙 <span id="coinsVal">0</span></div>
+    <div class="av-btn" id="topAv" onclick="openEdit()">👤</div>
+  </div>
+</div>
+
+<main>
+  <!-- Profile -->
+  <div class="profile-strip" onclick="openEdit()">
+    <div class="p-av" id="pAv">👤</div>
+    <div class="p-info">
+      <div class="p-name" id="pName">Yüklənir...</div>
+      <div class="p-meta">
+        <span>⭐ <span id="pXP">0</span> XP</span>
+        <span>🏆 <span id="pWins">0</span></span>
+        <span class="p-code" id="pCode">#—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+        <div style="font-size:.65rem;color:var(--muted)">Lv.<span id="pLvl">1</span></div>
+        <div class="lvl-bar" style="flex:1"><div class="lvl-fill" id="lvlFill" style="width:10%"></div></div>
+      </div>
+    </div>
+    <i class="fa fa-pen edit-icon"></i>
+  </div>
+
+  <!-- Online -->
+  <div class="online-bar">
+    <div class="online-dot"></div>
+    <div class="info">İndi online</div>
+    <div class="num" id="onlineNum">—</div>
+  </div>
+
+  <!-- Modes -->
+  <div class="sec-head">
+    <div class="sec-title">🎮 Oyun Rejimləri</div>
+  </div>
+  <div class="modes-grid">
+    <div class="mode-card" onclick="quickPlay('sise')">
+      <span class="mode-badge badge-hot">🔥 HOT</span>
+      <span class="mode-icon">🍾</span>
+      <div class="mode-name">Şişə Çevir</div>
+      <div class="mode-desc">Tapşırıq oyunu · 2-8 nəfər</div>
+    </div>
+    <div class="mode-card" onclick="quickPlay('dama')">
+      <span class="mode-badge badge-live">♟ 1v1</span>
+      <span class="mode-icon">♟️</span>
+      <div class="mode-name">Dama</div>
+      <div class="mode-desc">Klassik türk daması · 1v1</div>
+    </div>
+    <div class="mode-card" onclick="quickPlay('uno')">
+      <span class="mode-badge badge-new">YENİ</span>
+      <span class="mode-icon">🃏</span>
+      <div class="mode-name">UNO</div>
+      <div class="mode-desc">Kart oyunu · 2-4 nəfər</div>
+    </div>
+    <div class="mode-card" onclick="quickPlay('domino')">
+      <span class="mode-icon">🁢</span>
+      <div class="mode-name">Domino</div>
+      <div class="mode-desc">Nöqtəli oyun · 2-4 nəfər</div>
+    </div>
+    <div class="mode-card" onclick="quickPlay('film')">
+      <span class="mode-icon">🎬</span>
+      <div class="mode-name">Film Quiz</div>
+      <div class="mode-desc">Film bilgisi · 2-8 nəfər</div>
+    </div>
+    <div class="mode-card" onclick="quickPlay('chat')">
+      <span class="mode-icon">💬</span>
+      <div class="mode-name">Söhbət</div>
+      <div class="mode-desc">Açıq otaq · çox nəfər</div>
+    </div>
+  </div>
+
+  <!-- Rooms -->
+  <div class="sec-head">
+    <div class="sec-title">🚪 Aktiv Otaqlar</div>
+    <button class="create-btn" onclick="openCreate()"><i class="fa fa-plus"></i> Yarat</button>
+  </div>
+  <div class="room-list" id="roomList"><div class="empty">⏳ Otaqlar yüklənir...</div></div>
+
+  <!-- Leaderboard -->
+  <div class="sec-head" style="margin-top:24px">
+    <div class="sec-title">🏆 Liderlik Cədvəli</div>
+    <div class="sec-action" onclick="loadLB()">Hamısı →</div>
+  </div>
+  <div class="lb-mini" id="lbMini"></div>
+</main>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-home"><i class="fa fa-house"></i>Ana Səhifə</button>
+  <button class="nav-btn" onclick="document.getElementById('roomList').scrollIntoView({behavior:'smooth'})"><i class="fa fa-door-open"></i>Otaqlar</button>
+  <button class="nav-btn" onclick="openEdit()"><i class="fa fa-user"></i>Profil</button>
+  <button class="nav-btn" onclick="doLogout()"><i class="fa fa-right-from-bracket"></i>Çıxış</button>
+</div>
+
+<!-- Create Room Modal -->
+<div class="modal-bg" id="createModal" onclick="if(event.target===this)closeCreate()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">🚪 Otaq Yarat</div>
+    <label class="flabel">Otaq adı</label>
+    <input class="finput" id="roomNameInp" placeholder="Otaq adı...">
+    <label class="flabel">Oyun seçin</label>
+    <div class="game-select" id="gameSelGrid">
+      <div class="gs-opt sel" data-g="sise" onclick="selGame(this)"><div class="gi">🍾</div><div class="gn">Şişə</div></div>
+      <div class="gs-opt" data-g="dama" onclick="selGame(this)"><div class="gi">♟️</div><div class="gn">Dama</div></div>
+      <div class="gs-opt" data-g="uno" onclick="selGame(this)"><div class="gi">🃏</div><div class="gn">UNO</div></div>
+      <div class="gs-opt" data-g="domino" onclick="selGame(this)"><div class="gi">🁢</div><div class="gn">Domino</div></div>
+      <div class="gs-opt" data-g="film" onclick="selGame(this)"><div class="gi">🎬</div><div class="gn">Film</div></div>
+      <div class="gs-opt" data-g="chat" onclick="selGame(this)"><div class="gi">💬</div><div class="gn">Söhbət</div></div>
+    </div>
+    <label class="flabel">Kod ilə qoşul</label>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input class="finput" id="joinCode" placeholder="Otaq kodu..." maxlength="6" style="margin:0;text-transform:uppercase;flex:1">
+      <button style="padding:0 16px;border:none;border-radius:11px;background:var(--accent);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer" onclick="joinByCode()">Qoşul</button>
+    </div>
+    <button class="btn-main" onclick="doCreateRoom()">🚀 Otaq Yarat</button>
+    <button class="btn-sec" onclick="closeCreate()">Bağla</button>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-bg" id="editModal" onclick="if(event.target===this)closeEdit()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">✏️ Profili Düzəlt</div>
+    <label class="flabel">Görünən Ad</label>
+    <input class="finput" id="epName" maxlength="30">
+    <label class="flabel">Avatar</label>
+    <div class="av-grid" id="avGrid"></div>
+    <div class="upload-area" onclick="document.getElementById('imgFile').click()"><i class="fa fa-image"></i> Profil şəkli yüklə (JPG/PNG)</div>
+    <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="uploadPhoto(event)">
+    <label class="flabel">Bio</label>
+    <input class="finput" id="epBio" placeholder="Qısa bio..." maxlength="80">
+    <button class="btn-main" onclick="saveProfile()">💾 Saxla</button>
+    <button class="btn-sec" onclick="closeEdit()">Bağla</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const WS_URL=location.origin;
+const GAME_ICON={sise:'🍾',dama:'♟️',uno:'🃏',domino:'🁢',film:'🎬',chat:'💬'};
+const GAME_NAME={sise:'Şişə Çevir',dama:'Dama',uno:'UNO',domino:'Domino',film:'Film Quiz',chat:'Söhbət'};
+const AVATARS=['🦊','🐺','🐉','🦁','🐸','🤖','👾','💀','🐯','🦋','🌙','⭐'];
+const LEVEL_XP=[0,100,250,500,900,1400,2100,3000,4200,5800,8000];
+
+let sess=null, socket=null, selGameType='sise';
+
+/* ── SESSION ── */
+function getSess(){return JSON.parse(localStorage.getItem('maya_session')||'null')}
+function saveSess(s){localStorage.setItem('maya_session',JSON.stringify(s))}
+const DB=()=>{try{return JSON.parse(localStorage.getItem('maya_db')||'{}')}catch{return{}}};
+const saveDB=d=>localStorage.setItem('maya_db',JSON.stringify(d));
+
+function init(){
+  sess=getSess();
+  if(!sess){location.href='index.html';return}
+  renderProfile();
+  buildAvGrid();
+  connectSocket();
+}
+
+function renderProfile(){
+  document.getElementById('coinsVal').textContent=sess.coins||0;
+  document.getElementById('pName').textContent=sess.display_name||sess.username;
+  document.getElementById('pXP').textContent=sess.xp||0;
+  document.getElementById('pWins').textContent=sess.wins||0;
+  document.getElementById('pCode').textContent='#'+(sess.code||'—');
+  const lvl=calcLvl(sess.xp||0);
+  document.getElementById('pLvl').textContent=lvl;
+  const xpCur=sess.xp||0, xpNxt=LEVEL_XP[Math.min(lvl,LEVEL_XP.length-1)]||1;
+  const xpPrev=LEVEL_XP[Math.max(lvl-1,0)]||0;
+  const pct=Math.min(100,Math.round((xpCur-xpPrev)/(xpNxt-xpPrev)*100));
+  document.getElementById('lvlFill').style.width=pct+'%';
+
+  const av=sess.photo||sess.avatar||'👤';
+  const isImg=av.startsWith('data:');
+  const avEl=document.getElementById('pAv');
+  avEl.innerHTML=isImg?`<img src="${av}">`:`<span style="font-size:2rem">${av}</span>`;
+  const topAv=document.getElementById('topAv');
+  topAv.innerHTML=isImg?`<img src="${av}">`:(av==='👤'?'👤':av);
+}
+
+function calcLvl(xp){for(let i=LEVEL_XP.length-1;i>=0;i--)if(xp>=LEVEL_XP[i])return i+1;return 1}
+
+/* ── SOCKET ── */
+function connectSocket(){
+  socket=io(WS_URL,{transports:['websocket','polling']});
+  socket.on('connect',()=>{
+    socket.emit('auth',{id:sess.id,display_name:sess.display_name||sess.username,avatar:sess.avatar,photo:sess.photo},res=>{
+      if(res?.user){
+        sess.xp=res.user.xp;sess.level=res.user.level;sess.wins=res.user.wins;sess.coins=res.user.coins;
+        saveSess(sess);renderProfile();
+      }
+    });
+    loadRooms();loadLB();
+    document.getElementById('onlineNum').textContent='online';
+  });
+  socket.on('disconnect',()=>toast('⚠️ Server bağlantısı kəsildi'));
+  socket.on('connect_error',()=>{document.getElementById('onlineNum').textContent='offline';loadRoomsFallback()});
+}
+
+/* ── ROOMS ── */
+function loadRooms(){
+  if(socket?.connected){
+    socket.emit('list_rooms',{},renderRooms);
+    document.getElementById('onlineNum').textContent='bağlı';
+  } else loadRoomsFallback();
+}
+function loadRoomsFallback(){
+  renderRooms({rooms:JSON.parse(localStorage.getItem('maya_rooms')||'[]')});
+}
+
+function renderRooms(data){
+  const rooms=data.rooms||[];
+  const el=document.getElementById('roomList');
+  if(!rooms.length){el.innerHTML='<div class="empty">😴 Aktiv otaq yoxdur — birini sən yarat!</div>';return}
+  el.innerHTML=rooms.map(r=>`
+    <div class="room-item" onclick="goRoom('${r.id}','${r.game}','${r.code}')">
+      <div class="room-mode-icon">${GAME_ICON[r.game]||'🎮'}</div>
+      <div class="room-info">
+        <div class="room-name">${esc(r.name||'Adsız Otaq')}</div>
+        <div class="room-meta">
+          <span>${GAME_NAME[r.game]||r.game}</span>
+          <span>·</span>
+          <span>${esc(r.host_name||'?')}</span>
+          <span>·</span>
+          <span class="p-code">#${r.code}</span>
+        </div>
+      </div>
+      <div class="room-cnt"><div class="live-dot"></div>${r.players||1}/${r.max||8}</div>
+    </div>`).join('');
+}
+
+function goRoom(id,game,code){
+  location.href=`game.html?id=${id}&game=${game}&code=${code}`;
+}
+
+/* ── LEADERBOARD ── */
+function loadLB(){
+  if(socket?.connected){
+    socket.emit('leaderboard',{},res=>renderLB(res?.leaders||[]));
+  } else fetch(WS_URL.replace('wss://','https://').replace('ws://','http://')+'/api/leaderboard').then(r=>r.json()).then(d=>renderLB(d.leaders||[])).catch(()=>{});
+}
+function renderLB(leaders){
+  const ranks=['🥇','🥈','🥉'];
+  document.getElementById('lbMini').innerHTML=leaders.slice(0,5).map((u,i)=>`
+    <div class="lb-row">
+      <div class="lb-rank">${ranks[i]||i+1}</div>
+      <div class="lb-av">${u.photo?`<img src="${u.photo}">`:(u.avatar||'👤')}</div>
+      <div class="lb-name">${esc(u.display_name||u.username||'?')}</div>
+      <div class="lb-xp">${u.xp||0} XP</div>
+    </div>`).join('');
+}
+
+/* ── CREATE ROOM ── */
+let selGameType2='sise';
+function openCreate(game){
+  if(game){selGameType2=game;document.querySelectorAll('.gs-opt').forEach(e=>e.classList.toggle('sel',e.dataset.g===game))}
+  document.getElementById('roomNameInp').value=(sess.display_name||sess.username)+"'in otağı";
+  document.getElementById('createModal').classList.add('show');
+}
+function closeCreate(){document.getElementById('createModal').classList.remove('show')}
+function selGame(el){document.querySelectorAll('.gs-opt').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');selGameType2=el.dataset.g}
+
+function doCreateRoom(){
+  const name=document.getElementById('roomNameInp').value.trim()||(sess.display_name+"'in otağı");
+  if(socket?.connected){
+    socket.emit('create_room',{name,game:selGameType2},res=>{
+      if(res?.ok){
+        closeCreate();
+        location.href=`game.html?id=${res.room_id}&game=${selGameType2}&code=${res.code}`;
+      } else toast('❌ Otaq yaradıla bilmədi');
+    });
+  } else {
+    // offline fallback
+    const id='r_'+Date.now();
+    const rooms=JSON.parse(localStorage.getItem('maya_rooms')||'[]');
+    rooms.unshift({id,name,game:selGameType2,code:'DEMO',players:1,max:8,host_name:sess.display_name});
+    localStorage.setItem('maya_rooms',JSON.stringify(rooms.slice(0,50)));
+    closeCreate();
+    location.href=`game.html?id=${id}&game=${selGameType2}&code=DEMO`;
+  }
+}
+
+function joinByCode(){
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();
+  if(!code){toast('❌ Kodu daxil edin');return}
+  if(socket?.connected){
+    socket.emit('join_room',{code},res=>{
+      if(res?.ok){closeCreate();location.href=`game.html?id=${res.room_id}&game=${res.game||'sise'}&code=${code}`;}
+      else toast('❌ Otaq tapılmadı: #'+code);
+    });
+  } else toast('⚠️ Server bağlantısı yoxdur');
+}
+
+function quickPlay(game){
+  // Find existing room or create
+  if(socket?.connected){
+    socket.emit('list_rooms',{game},res=>{
+      const rooms=res?.rooms||[];
+      if(rooms.length){goRoom(rooms[0].id,game,rooms[0].code)}
+      else{openCreate(game)}
+    });
+  } else openCreate(game);
+}
+
+/* ── EDIT PROFILE ── */
+function buildAvGrid(){
+  const grid=document.getElementById('avGrid');
+  grid.innerHTML=AVATARS.map(a=>`<div class="av-opt${sess.avatar===a?' sel':''}" onclick="pickAv(this,'${a}')">${a}</div>`).join('');
+}
+function pickAv(el,av){document.querySelectorAll('.av-opt').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');sess._tmpAv=av}
+function openEdit(){document.getElementById('epName').value=sess.display_name||sess.username;document.getElementById('epBio').value=sess.bio||'';document.getElementById('editModal').classList.add('show')}
+function closeEdit(){document.getElementById('editModal').classList.remove('show')}
+
+function uploadPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    sess.photo=ev.target.result;sess.avatar='📷';
+    saveProfile(true);
+    document.querySelectorAll('.av-opt').forEach(el=>el.classList.remove('sel'));
+    toast('✅ Şəkil yükləndi!');
+  };
+  r.readAsDataURL(f);
+}
+
+function saveProfile(skipClose){
+  if(sess._tmpAv){sess.avatar=sess._tmpAv;sess.photo=null;delete sess._tmpAv}
+  const nameVal=document.getElementById('epName').value.trim();
+  if(nameVal) sess.display_name=nameVal;
+  sess.bio=document.getElementById('epBio').value||'';
+  saveSess(sess);
+  const db=DB();if(db[sess.username]){Object.assign(db[sess.username],{display_name:sess.display_name,avatar:sess.avatar,photo:sess.photo,bio:sess.bio});saveDB(db)}
+  if(socket?.connected) socket.emit('update_profile',{display_name:sess.display_name,avatar:sess.avatar,photo:sess.photo,bio:sess.bio});
+  renderProfile();buildAvGrid();
+  if(!skipClose) closeEdit();
+  toast('✅ Profil güncəlləndi!');
+}
+
+function doLogout(){localStorage.removeItem('maya_session');location.href='index.html'}
+
+let _tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2500)}
+function esc(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+init();
+setInterval(loadRooms,8000);
+</script>
+</body>
+</html>

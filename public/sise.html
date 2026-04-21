@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Şişə Çevirme</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI',Tahoma,sans-serif;background:#000;display:flex;flex-direction:column;align-items:center}
+
+.app{
+  width:100%;max-width:430px;height:100dvh;
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+  background:
+    repeating-linear-gradient(0deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0.015) 1px,rgba(0,0,0,0) 2px,rgba(0,0,0,0) 28px),
+    repeating-linear-gradient(90deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0.015) 1px,rgba(0,0,0,0) 2px,rgba(0,0,0,0) 28px),
+    linear-gradient(160deg,
+      #d4853a 0%,#c07030 10%,#d48040 20%,
+      #b86828 30%,#c87838 40%,#a05520 50%,
+      #c07535 60%,#b06030 70%,#c88040 80%,
+      #b06828 90%,#c07535 100%);
+}
+
+/* Wood grain overlay */
+.app::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(
+    4deg,
+    rgba(0,0,0,0) 0px,rgba(0,0,0,0) 12px,
+    rgba(255,255,255,0.03) 13px,rgba(255,255,255,0.03) 14px,
+    rgba(0,0,0,0) 15px,rgba(0,0,0,0) 30px,
+    rgba(0,0,0,0.04) 31px,rgba(0,0,0,0.04) 32px
+  );
+}
+
+/* ══ TOPBAR ══ */
+.topbar{
+  width:100%;padding:12px 14px 8px;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:50;flex-shrink:0;position:relative;
+}
+
+.heart-box{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,0.25);border-radius:20px;
+  padding:6px 12px 6px 10px;
+  border:1px solid rgba(255,255,255,0.15);
+  cursor:pointer;transition:.2s;
+}
+.heart-box:active{transform:scale(.92)}
+.heart-box i{font-size:18px;color:#ff4444;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
+.heart-box span{color:#fff;font-weight:800;font-size:17px;text-shadow:1px 1px 3px rgba(0,0,0,0.5)}
+
+.topbar-mid{display:flex;align-items:center;gap:7px}
+
+.circ-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,0.18);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:13px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.25);
+  transition:all .15s;position:relative;
+}
+.circ-btn:active{transform:scale(.85)}
+.circ-btn .notif{
+  position:absolute;top:-4px;right:-4px;
+  width:15px;height:15px;border-radius:50%;
+  background:#ff4444;border:2px solid rgba(180,90,30,.8);
+  font-size:8px;color:#fff;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.masa-group{display:flex;align-items:center;gap:6px}
+.masa-label{color:#fff;font-size:9px;font-weight:700;line-height:1.1;text-align:center;text-shadow:1px 1px 2px rgba(0,0,0,0.6)}
+.masa-label span{font-size:16px;display:block;font-weight:900}
+
+/* ══ GAME TABLE ══ */
+.game-table{
+  width:100%;flex-shrink:0;
+  height:54dvh;position:relative;z-index:1;
+}
+
+/* Oval table surface */
+.table-surface{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:72%;height:55%;
+  background:radial-gradient(ellipse at 40% 35%,
+    rgba(212,160,80,0.15) 0%,
+    rgba(160,100,40,0.08) 60%,
+    rgba(0,0,0,0) 100%);
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.06);
+  pointer-events:none;
+}
+
+.pslot{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:5}
+.pslot.p1{top:6%;left:4%}
+.pslot.p2{top:0%;left:35%}
+.pslot.p3{top:6%;right:4%}
+.pslot.p4{top:36%;left:1%}
+.pslot.p5{top:36%;right:1%}
+.pslot.p6{bottom:6%;left:4%}
+.pslot.p7{bottom:0%;left:33%}
+.pslot.p8{bottom:6%;right:4%}
+
+.pslot .avatar{
+  width:66px;height:66px;border-radius:14px;
+  border:2.5px solid rgba(255,255,255,0.25);
+  overflow:hidden;background:rgba(0,0,0,0.2);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.3);font-size:22px;
+  position:relative;
+  box-shadow:0 4px 16px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.15);
+  transition:border-color .3s,box-shadow .3s;
+}
+.pslot .avatar img{width:100%;height:100%;object-fit:cover}
+.pslot .badge-top{
+  position:absolute;top:-7px;right:-5px;
+  background:#e53935;color:#fff;
+  font-size:8px;font-weight:900;
+  min-width:17px;height:17px;border-radius:9px;padding:0 3px;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(255,255,255,0.8);
+  box-shadow:0 2px 4px rgba(0,0,0,0.4);
+}
+.pslot .flowers{font-size:16px;margin-top:3px;line-height:1}
+.pslot .uname{
+  font-size:9.5px;color:#fff;font-weight:800;margin-top:2px;
+  text-shadow:1px 1px 4px rgba(0,0,0,0.9),0 0 8px rgba(0,0,0,0.5);
+  max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:flex;align-items:center;gap:2px;
+}
+
+.pslot.is-turn .avatar{
+  border-color:gold!important;
+  box-shadow:0 0 0 2px rgba(255,215,0,0.3),0 0 20px rgba(255,215,0,.8),0 4px 16px rgba(0,0,0,.45)!important;
+}
+.pslot.is-target .avatar{
+  border-color:#ff1744!important;
+  box-shadow:0 0 0 2px rgba(255,23,68,.3),0 0 24px rgba(255,23,68,1),0 4px 16px rgba(0,0,0,.45)!important;
+  animation:tgtBlink .45s ease infinite alternate;
+}
+@keyframes tgtBlink{
+  from{box-shadow:0 0 8px rgba(255,23,68,.5),0 4px 16px rgba(0,0,0,.45)}
+  to{box-shadow:0 0 28px rgba(255,23,68,1),0 4px 16px rgba(0,0,0,.45)}
+}
+
+/* ── Ludo Icon (game switcher) ── */
+.ludo-icon{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:52px;height:52px;border-radius:14px;
+  z-index:3;opacity:0.15;pointer-events:none;
+}
+
+/* ── Bottle ── */
+.bottle-center{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10;display:flex;flex-direction:column;align-items:center;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,0.6));
+}
+.bottle-img{
+  width:48px;cursor:pointer;
+  transition:transform 4s cubic-bezier(0.15,0,0.15,1);
+  transform-origin:center center;
+}
+.bottle-img.spin-anim{transition:transform 4s cubic-bezier(0.15,0,0.15,1)}
+.bottle-img.disabled{opacity:.45;pointer-events:none;filter:grayscale(60%)}
+
+.bottle-status-text{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:120px;text-align:center;
+  color:rgba(255,255,255,0.92);font-size:10px;font-weight:700;
+  text-shadow:0 1px 6px rgba(0,0,0,.9);
+  pointer-events:none;z-index:11;line-height:1.5;
+}
+
+.spin-hint{
+  position:absolute;top:28%;left:53%;
+  color:#fff;font-size:12px;font-weight:800;
+  text-shadow:1px 1px 4px rgba(0,0,0,.9);
+  display:none;flex-direction:column;align-items:center;
+  transform:rotate(12deg);pointer-events:none;z-index:12;
+  line-height:1.4;text-align:center;
+  animation:hintPulse 1.5s ease infinite;
+}
+@keyframes hintPulse{0%,100%{opacity:1;transform:rotate(12deg) scale(1)}50%{opacity:.7;transform:rotate(12deg) scale(.94)}}
+.spin-hint i{font-size:16px;margin-bottom:3px}
+
+/* ══ CHAT ══ */
+.chat-section{
+  flex:1;display:flex;flex-direction:column;
+  background:#f2f2f4;border-top:1.5px solid #d0d0d8;
+  overflow:hidden;position:relative;z-index:2;
+}
+
+.chat-msgs{
+  flex:1;overflow-y:auto;padding:2px 0;
+  display:flex;flex-direction:column;gap:0;
+}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+
+.msg-row{
+  background:#fff;padding:7px 12px;
+  display:flex;gap:8px;border-bottom:1px solid #f0f0f2;
+  animation:msgIn .18s ease;
+}
+@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.msg-row.system{
+  justify-content:center;font-style:italic;
+  color:#999;font-size:11.5px;background:#fafafa;padding:6px;
+}
+.msg-avt{
+  width:34px;height:34px;border-radius:9px;overflow:hidden;
+  flex-shrink:0;background:#eee;
+  display:flex;align-items:center;justify-content:center;
+  color:#bbb;font-size:14px;
+}
+.msg-avt img{width:100%;height:100%;object-fit:cover}
+.msg-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+.msg-text{font-size:13px;color:#222;word-break:break-word;line-height:1.35}
+.msg-name{font-size:10px;font-weight:800;margin-bottom:1px}
+
+/* Floating reactions */
+.chat-floating-icons{
+  position:absolute;right:0;bottom:66px;
+  display:flex;flex-direction:column;gap:8px;z-index:20;
+}
+.chat-float-btn{
+  width:46px;height:38px;
+  background:#fff;border:1px solid #e0e0e0;border-right:none;
+  border-radius:18px 0 0 18px;
+  box-shadow:-2px 2px 8px rgba(0,0,0,.1);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .15s;padding-left:4px;
+}
+.chat-float-btn:active{transform:scale(.88) translateX(2px)}
+.chat-float-btn i{font-size:19px}
+
+.input-bar{
+  display:flex;align-items:center;
+  padding:9px 12px;background:#fff;
+  border-top:1px solid #eee;gap:8px;flex-shrink:0;
+}
+.chat-input{flex:1;border:none;font-size:14px;outline:none;color:#333;background:transparent}
+.chat-input::placeholder{color:#bbb}
+.gift-btn{font-size:20px;cursor:pointer;flex-shrink:0}
+.send-btn-chat{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#ff8c00,#ffa73b);
+  color:#fff;border:none;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 3px 10px rgba(255,140,0,.35);flex-shrink:0;
+  transition:.15s;
+}
+.send-btn-chat:active{transform:scale(.88)}
+
+/* ══ MODALS ══ */
+.modal-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0.65);z-index:500;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(3px);
+}
+.modal-overlay.show{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.mm-close{
+  position:absolute;top:-11px;right:-11px;
+  width:28px;height:28px;border-radius:50%;
+  background:#fff;font-size:13px;color:#555;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:5;
+}
+
+/* Challenge */
+.challenge-box{
+  width:90%;max-width:340px;background:#fff;
+  border-radius:22px;padding:26px 20px 20px;
+  display:flex;flex-direction:column;align-items:center;gap:11px;
+  position:relative;box-shadow:0 16px 48px rgba(0,0,0,.55);overflow:hidden;
+}
+.challenge-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,#ff6b00,#ffaa00,#ff6b00);
+}
+.ch-cat{font-size:54px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(0) rotate(-15deg);opacity:0}to{transform:none;opacity:1}}
+.ch-lbl{font-size:9px;color:#bbb;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.ch-tname{font-size:22px;font-weight:900;color:#ff4500}
+.ch-title{font-size:20px;font-weight:900;color:#222;text-align:center;line-height:1.2}
+.ch-desc{
+  font-size:12.5px;color:#666;text-align:center;line-height:1.55;
+  background:#f7f7f7;border-radius:12px;padding:12px 14px;width:100%;
+}
+.ch-xp{background:#fff3e0;border:1px solid #ffcc80;color:#e65100;
+  padding:5px 16px;border-radius:20px;font-size:12px;font-weight:800}
+.ch-btns{display:flex;gap:10px;width:100%}
+.ch-btns button{
+  flex:1;padding:13px;border:none;border-radius:13px;
+  font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;
+}
+.ch-btns button:active{transform:scale(.94)}
+.btn-done{background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;box-shadow:0 4px 14px rgba(67,160,71,.3)}
+.btn-skip{background:#f0f0f0;color:#888;border:1px solid #ddd}
+
+/* Result */
+.result-box{
+  width:88%;max-width:320px;background:#fff;
+  border-radius:22px;padding:30px 22px;
+  display:flex;flex-direction:column;align-items:center;gap:13px;
+  position:relative;box-shadow:0 16px 48px rgba(0,0,0,.55);
+}
+.res-icon{font-size:66px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.res-text{font-size:18px;font-weight:900;color:#222;text-align:center}
+.res-xp{font-size:16px;color:#ff8c00;font-weight:800}
+.res-btn{
+  width:100%;padding:14px;border:none;border-radius:13px;
+  background:linear-gradient(135deg,#ff8c00,#ffa73b);
+  color:#fff;font-weight:800;font-size:15px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(255,140,0,.35);
+}
+
+/* Heart modal */
+.heart-box-modal{
+  width:92%;max-width:360px;max-height:84vh;
+  background:linear-gradient(170deg,#c82222,#a01818);
+  border-radius:22px;padding:38px 12px 14px;position:relative;
+  box-shadow:0 12px 48px rgba(0,0,0,.6);
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  border:1px solid rgba(255,255,255,0.15);
+}
+.hm-title{color:#fff;font-size:17px;font-weight:900;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.hm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:100%;overflow-y:auto}
+.hm-card{
+  background:#fff;border-radius:12px;padding:8px 4px 6px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:3px;text-align:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);position:relative;
+}
+.hm-card.sp{border:2px solid gold}
+.hm-badge{position:absolute;top:-7px;background:#9c27b0;color:#fff;
+  font-size:7px;padding:2px 5px;border-radius:4px;font-weight:800}
+.hm-val{color:#ff5722;font-weight:900;font-size:12px}
+.hm-icon{font-size:21px}
+.hm-btn{background:#2196f3;color:#fff;border:none;font-size:8.5px;
+  padding:3px 6px;border-radius:5px;margin-top:3px;font-weight:800;cursor:pointer;width:88%}
+.hm-gbtn{background:#8bc34a;width:88%;padding:4px;color:#fff;
+  border-radius:5px;border:none;font-weight:800;font-size:9px;
+  display:flex;align-items:center;justify-content:center;gap:2px;
+  cursor:pointer;margin-top:auto}
+
+/* Settings */
+.settings-menu{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.65);z-index:400;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(3px);
+}
+.settings-menu.show{display:flex;animation:fadeIn .2s}
+.sm-box{
+  background:#fff;width:84%;max-width:300px;
+  border-radius:18px;padding:20px;position:relative;
+}
+.sm-title{text-align:center;color:#bbb;font-weight:700;font-size:14px;margin-bottom:14px}
+.sm-item{
+  padding:13px 10px;border-bottom:1px solid #f0f0f0;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;font-weight:500;font-size:14px;color:#333;
+  transition:.15s;
+}
+.sm-item:hover{background:#fafafa}
+.sm-item:last-child{border-bottom:none}
+
+/* Leaderboard */
+.lb-box{
+  width:90%;max-width:340px;background:#fff;
+  border-radius:22px;padding:20px;position:relative;
+  box-shadow:0 16px 48px rgba(0,0,0,.55);
+  max-height:86vh;display:flex;flex-direction:column;gap:12px;
+}
+.lb-title{text-align:center;font-weight:900;font-size:15px;color:#333}
+.lb-list{overflow-y:auto;display:flex;flex-direction:column;gap:6px;flex:1}
+.lb-item{display:flex;align-items:center;gap:10px;background:#f9f9f9;border-radius:12px;padding:9px 12px}
+.lb-rank{font-size:18px;font-weight:900;width:26px}
+.lb-name{flex:1;font-weight:700;font-size:12.5px}
+.lb-xp{font-weight:900;font-size:13px;color:#ff8c00}
+.lb-close{width:100%;padding:11px;border:none;border-radius:11px;background:#f0f0f0;font-weight:700;cursor:pointer;color:#555}
+
+/* Bottle picker */
+.bp-box{
+  width:90%;max-width:340px;background:#fff;
+  border-radius:22px;padding:20px;position:relative;
+  box-shadow:0 16px 48px rgba(0,0,0,.55);
+  display:flex;flex-direction:column;gap:14px;
+}
+.bp-title{text-align:center;font-weight:900;font-size:15px;color:#333}
+.bp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bp-item{
+  background:#f9f9f9;border:2.5px solid #eee;
+  border-radius:14px;padding:10px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;transition:all .18s;
+}
+.bp-item:hover{border-color:#ffa73b;background:#fff8f0}
+.bp-item.sel{border-color:#ff8c00;background:#fff3e0}
+.bp-item img{width:50px;height:auto}
+.bp-item span{font-size:10px;font-weight:700;color:#555}
+.bp-close{width:100%;padding:11px;border:none;border-radius:11px;background:#f0f0f0;font-weight:700;cursor:pointer;color:#555}
+
+/* Float reactions */
+.float-r{position:fixed;pointer-events:none;z-index:999;font-size:32px;animation:fUp 1.4s ease forwards}
+@keyframes fUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(1.5)}}
+
+/* Confetti */
+.cf-p{position:fixed;z-index:998;pointer-events:none;border-radius:2px;animation:cfF var(--d) ease forwards}
+@keyframes cfF{0%{opacity:1;transform:translateY(-10px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(540deg)}}
+
+/* Toast */
+#toast{
+  position:fixed;top:64px;left:50%;transform:translateX(-50%);
+  z-index:9999;background:rgba(0,0,0,.78);color:#fff;
+  padding:9px 20px;border-radius:22px;font-size:13px;font-weight:700;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+  white-space:nowrap;max-width:92vw;
+}
+#toast.show{opacity:1}
+
+/* Online badge */
+.online-badge{
+  position:absolute;bottom:-4px;right:-4px;
+  width:12px;height:12px;border-radius:50%;
+  background:#2ed573;border:2px solid rgba(200,120,50,.7);
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="heart-box" onclick="openHeartModal()">
+      <i class="fa-solid fa-heart"></i>
+      <span id="heartCount">0</span>
+    </div>
+
+    <div class="topbar-mid">
+      <div class="circ-btn" onclick="openLeaderboard()">
+        <i class="fa-solid fa-trophy"></i>
+        <div class="notif">!</div>
+      </div>
+      <div class="circ-btn" onclick="openSettingsMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+      <div class="circ-btn" onclick="openSettingsMenu()">
+        <i class="fa-solid fa-gear"></i>
+      </div>
+      <div class="circ-btn" id="soundBtn" onclick="toggleSound()">
+        <i class="fa-solid fa-volume-high"></i>
+      </div>
+    </div>
+
+    <div class="masa-group">
+      <div class="masa-label">Masa<br><span id="masaNum">—</span></div>
+      <div class="circ-btn" id="refreshBtn" onclick="changeTable()">
+        <i class="fa-solid fa-rotate"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME TABLE -->
+  <div class="game-table" id="gameTable">
+    <div class="table-surface"></div>
+
+    <!-- 8 player slots -->
+    <div class="pslot p1" id="pslot_1"></div>
+    <div class="pslot p2" id="pslot_2"></div>
+    <div class="pslot p3" id="pslot_3"></div>
+    <div class="pslot p4" id="pslot_4"></div>
+    <div class="pslot p5" id="pslot_5"></div>
+    <div class="pslot p6" id="pslot_6"></div>
+    <div class="pslot p7" id="pslot_7"></div>
+    <div class="pslot p8" id="pslot_8"></div>
+
+    <!-- Bottle -->
+    <div class="bottle-center">
+      <div class="bottle-status-text" id="bStatusTxt">İştirakçılar<br>gözlənilir…</div>
+      <img id="bottleImg"
+        src="https://freesorgupanel.neocities.org/image/1000967523.png"
+        class="bottle-img disabled"
+        onclick="doSpin()">
+    </div>
+
+    <div class="spin-hint" id="spinHint">
+      <i class="fa-solid fa-arrow-turn-down"></i>
+      <span>Butulkanı<br>fırlat!</span>
+    </div>
+  </div>
+
+  <!-- CHAT SECTION -->
+  <div class="chat-section">
+    <div class="chat-floating-icons">
+      <div class="chat-float-btn" onclick="sendReaction('🔥')">
+        <i class="fa-solid fa-fire" style="color:#ff6600"></i>
+      </div>
+      <div class="chat-float-btn" onclick="sendReaction('😂')">
+        <i class="fa-solid fa-face-laugh-squint" style="color:#f9c74f"></i>
+      </div>
+      <div class="chat-float-btn" onclick="sendReaction('❤️')">
+        <i class="fa-solid fa-heart" style="color:#e91e63"></i>
+      </div>
+    </div>
+
+    <div class="chat-msgs" id="chatMsgs"></div>
+
+    <div class="input-bar">
+      <input class="chat-input" id="chatInp" placeholder="Mesajı bura yaz"
+        onkeydown="if(event.key==='Enter')sendMsg()">
+      <span class="gift-btn">🎁</span>
+      <button class="send-btn-chat" onclick="sendMsg()">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- CHALLENGE MODAL -->
+  <div class="modal-overlay" id="challengeModal">
+    <div class="challenge-box">
+      <div class="mm-close" onclick="closeCh()"><i class="fa-solid fa-xmark"></i></div>
+      <div class="ch-cat" id="chCat">🎤</div>
+      <div class="ch-lbl">Görevli</div>
+      <div class="ch-tname" id="chTname">—</div>
+      <div class="ch-title" id="chTitle">—</div>
+      <div class="ch-desc" id="chDesc">—</div>
+      <div class="ch-xp">⭐ <span id="chXP">20</span> XP</div>
+      <div class="ch-btns" id="chBtns">
+        <button class="btn-done" onclick="resolveCh(true)">✅ Tamamladı!</button>
+        <button class="btn-skip" onclick="resolveCh(false)">❌ Keçdi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT MODAL -->
+  <div class="modal-overlay" id="resultModal">
+    <div class="result-box">
+      <div class="mm-close" onclick="closeRes()"><i class="fa-solid fa-xmark"></i></div>
+      <div class="res-icon" id="resIcon">🏆</div>
+      <div class="res-text" id="resText">—</div>
+      <div class="res-xp" id="resXP"></div>
+      <button class="res-btn" onclick="closeRes()">Davam Et →</button>
+    </div>
+  </div>
+
+  <!-- HEART MODAL -->
+  <div class="modal-overlay" id="heartModal">
+    <div class="heart-box-modal">
+      <div class="mm-close" onclick="closeHeart()"><i class="fa-solid fa-xmark"></i></div>
+      <div class="hm-title">❤️ Ürəklər satın al</div>
+      <div class="hm-grid">
+        <div class="hm-card"><div class="hm-val" style="color:gold;font-size:13px">VIP</div><div style="font-size:7px;color:gold;font-weight:800">STATUS</div><i class="fa-solid fa-crown hm-icon" style="color:gold"></i><button class="hm-btn">Ətraflı</button></div>
+        <div class="hm-card"><div style="font-size:7px">Dostunuz üçün</div><div class="hm-val">❤️20</div><i class="fa-solid fa-user-plus hm-icon" style="color:#aaa"></i><button class="hm-btn">Ətraflı</button></div>
+        <div class="hm-card"><div style="font-size:7px">Komplimentlər</div><div class="hm-val">❤️10</div><i class="fa-solid fa-envelope-open-text hm-icon" style="color:pink"></i><button class="hm-btn">Ətraflı</button></div>
+        <div class="hm-card sp"><div class="hm-badge">Ən yaxşı</div><div class="hm-val">❤️7000</div><div style="font-size:7px;color:orange">40% BONUS</div><div class="hm-icon">🎁</div><button class="hm-gbtn"><i class="fa-solid fa-star"></i> 5000</button></div>
+        <div class="hm-card sp"><div class="hm-val">❤️3125</div><div style="font-size:7px;color:orange">25% BONUS</div><div class="hm-icon">🛢️</div><button class="hm-gbtn"><i class="fa-solid fa-star"></i> 2500</button></div>
+        <div class="hm-card sp"><div class="hm-badge">Populyar</div><div class="hm-val">❤️1200</div><div style="font-size:7px;color:orange">20% BONUS</div><div class="hm-icon">🏺</div><button class="hm-gbtn"><i class="fa-solid fa-star"></i> 1000</button></div>
+        <div class="hm-card"><div class="hm-val">❤️500</div><div class="hm-icon">💰</div><button class="hm-gbtn"><i class="fa-solid fa-star"></i> 500</button></div>
+        <div class="hm-card"><div class="hm-val">❤️250</div><div class="hm-icon">📦</div><button class="hm-gbtn"><i class="fa-solid fa-star"></i> 250</button></div>
+        <div class="hm-card"><div class="hm-val">❤️50</div><div class="hm-icon">🔴</div><button class="hm-gbtn"><i class="fa-solid fa-star"></i> 50</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="modal-overlay" id="lbModal">
+    <div class="lb-box">
+      <div class="mm-close" onclick="closeLb()"><i class="fa-solid fa-xmark"></i></div>
+      <div class="lb-title">🏆 Liderlik Cədvəli</div>
+      <div class="lb-list" id="lbList"></div>
+      <button class="lb-close" onclick="closeLb()">Bağla</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="settings-menu" id="settingsMenu" onclick="closeSettings()">
+    <div class="sm-box" onclick="event.stopPropagation()">
+      <div class="mm-close" onclick="closeSettings()"><i class="fa-solid fa-xmark"></i></div>
+      <div class="sm-title">Parametrlər</div>
+      <div class="sm-item" onclick="openBottlePicker();closeSettings()">
+        <i class="fa-solid fa-wine-bottle" style="color:#e91e63"></i> Butulka seç
+      </div>
+      <div class="sm-item" onclick="toggleSound();closeSettings()">
+        <i class="fa-solid fa-volume-high" style="color:#8cc63f" id="sndIcon"></i>
+        <span id="sndLabel">Səslər: Açıq</span>
+      </div>
+      <div class="sm-item" onclick="location.href='dashboard.html'">
+        <i class="fa-solid fa-door-open" style="color:#ff6b35"></i> Lobbyə Qayıt
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTLE PICKER -->
+  <div class="modal-overlay" id="bpModal">
+    <div class="bp-box">
+      <div class="mm-close" onclick="closeBp()"><i class="fa-solid fa-xmark"></i></div>
+      <div class="bp-title">🍾 Butulka Seç</div>
+      <div class="bp-grid" id="bpGrid"></div>
+      <button class="bp-close" onclick="closeBp()">Bağla</button>
+    </div>
+  </div>
+
+</div><!-- .app -->
+
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+/* ════ DATA ════ */
+const BOTTLES = [
+  { id:1, name:'Viski',   src:'https://freesorgupanel.neocities.org/image/1000967523.png' },
+  { id:2, name:'Limonad', src:'https://freesorgupanel.neocities.org/image/1000967528.png' },
+  { id:3, name:'Enerji',  src:'https://freesorgupanel.neocities.org/image/1000967367.png' },
+  { id:4, name:'Şərab',   src:'https://freesorgupanel.neocities.org/image/1000967525.png' },
+  { id:5, name:'Kola',    src:'https://butilochka.cdnvideo.ru/bottle/bundle/300/b_cola_v2.base.webp?9' },
+  { id:6, name:'VIP 💎',  src:'https://butilochka.cdnvideo.ru/bottle/bundle/300/b_vip_v2.base.webp?9' },
+];
+const FLOWERS = ['🌹','💐','🌸','🌺','🌼','🌻','🍀','🌷','🌱','🦋'];
+
+/* ════ STATE ════ */
+let socket, myId, myName, mySlot, roomId;
+let myBottle = 1;
+let gameState = { room:{}, players:[] };
+let soundOn = true, spinning = false, totalRot = 0, timerRunning = false;
+
+/* ════ AUDIO ════ */
+let _ac;
+const AC = () => { if (!_ac) _ac = new (window.AudioContext||window.webkitAudioContext)(); return _ac; };
+function tone(f, type='sine', dur=.15, vol=.2, delay=0) {
+  if (!soundOn) return;
+  try {
+    const o = AC().createOscillator(), g = AC().createGain();
+    o.connect(g); g.connect(AC().destination);
+    o.type = type; o.frequency.value = f;
+    const t = AC().currentTime + delay;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + .01);
+    g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    o.start(t); o.stop(t + dur + .05);
+  } catch(e) {}
+}
+const click  = () => tone(900,'square',.04,.1);
+const joinSnd= () => { tone(440,'sine',.1,.2); tone(550,'sine',.1,.15,.09); };
+const winSnd = () => [523,659,784,1047].forEach((f,i)=>tone(f,'sine',.18,.2,i*.1));
+const failSnd= () => [350,280,200].forEach((f,i)=>tone(f,'sawtooth',.12,.16,i*.09));
+const notif  = () => { tone(620,'sine',.07,.2); tone(820,'sine',.07,.15,.07); };
+function spinSnd() {
+  if (!soundOn) return;
+  try {
+    const o = AC().createOscillator(), g = AC().createGain();
+    o.connect(g); g.connect(AC().destination);
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(80, AC().currentTime);
+    o.frequency.exponentialRampToValueAtTime(500, AC().currentTime + 2.5);
+    g.gain.setValueAtTime(.14, AC().currentTime);
+    g.gain.linearRampToValueAtTime(.02, AC().currentTime + 2.5);
+    o.start(AC().currentTime); o.stop(AC().currentTime + 2.8);
+  } catch(e) {}
+}
+function toggleSound() {
+  soundOn = !soundOn;
+  const icons = [document.querySelector('#soundBtn i'), document.getElementById('sndIcon')];
+  icons.forEach(i => i && (i.className = soundOn ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark'));
+  document.getElementById('sndLabel').textContent = soundOn ? 'Səslər: Açıq' : 'Səslər: Bağlı';
+  click();
+}
+
+/* ════ INIT ════ */
+window.onload = () => {
+  // Get params from URL or postMessage parent
+  const p = new URLSearchParams(location.search);
+  roomId = p.get('room') || null;
+  const uid = p.get('uid') || null;
+  const uname = p.get('user') || null;
+  const wsUrl = p.get('ws') ? decodeURIComponent(p.get('ws')) : location.origin;
+
+  // Also support Telegram WebApp
+  let tgUser = null;
+  try { tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user; } catch(e){}
+
+  if (uid) {
+    myId   = uid;
+    myName = uname || 'Oyunçu';
+  } else if (tgUser) {
+    myId   = String(tgUser.id);
+    myName = tgUser.first_name || 'Oyunçu';
+    if (window.Telegram?.WebApp?.expand) window.Telegram.WebApp.expand();
+  } else {
+    // Try session from localStorage
+    try {
+      const sess = JSON.parse(localStorage.getItem('maya_session') || '{}');
+      myId   = sess.id   || 'w_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+      myName = sess.display_name || sess.username || 'Oyunçu' + Math.floor(Math.random()*999);
+    } catch(e) {
+      myId   = 'w_' + Date.now();
+      myName = 'Oyunçu' + Math.floor(Math.random()*999);
+    }
+  }
+
+  socket = io(wsUrl, { transports: ['websocket','polling'] });
+
+  socket.on('connect', () => {
+    socket.emit('auth', { id: myId, display_name: myName });
+    socket.emit('join_room', { room_id: roomId, game: 'sise' }, res => {
+      if (res?.ok) {
+        roomId = res.room_id;
+        mySlot = res.slot;
+        document.getElementById('masaNum').textContent = res.code || '—';
+        socket.emit('set_bottle', { bottle_id: myBottle });
+        joinSnd();
+        showToast('✅ Otağa qoşuldunuz!');
+      } else if (res?.e) {
+        showToast('❌ ' + res.e);
+      }
+    });
+  });
+
+  socket.on('state', d => { gameState = d; renderTable(); });
+  socket.on('new_msg', appendMsg);
+  socket.on('history', msgs => { document.getElementById('chatMsgs').innerHTML = ''; msgs.forEach(appendMsg); });
+  socket.on('spin', doBottleSpin);
+  socket.on('challenge_result', showResult);
+  socket.on('reaction', d => spawnFloat(d.emoji));
+  socket.on('disconnect', () => showToast('❌ Bağlantı kəsildi…'));
+
+  // PostMessage from parent frame
+  window.addEventListener('message', e => {
+    if (!e.data || typeof e.data !== 'object') return;
+    const d = e.data;
+    if (d._event === 'spin') doBottleSpin(d);
+    if (d._event === 'challenge_result') showResult(d);
+    if (d._event === 'state') { gameState = d; renderTable(); }
+  });
+};
+
+/* ════ RENDER TABLE ════ */
+function renderTable() {
+  const { room, players } = gameState;
+  if (!room || !players) return;
+
+  if (room.code) document.getElementById('masaNum').textContent = room.code;
+
+  const meP = players.find(p => p.id === myId);
+  if (meP) mySlot = meP.slot;
+
+  const myTurn = mySlot && room.current_turn_slot === mySlot && !room.spin_in_progress;
+  const enough = players.length >= 2;
+
+  const bImg = document.getElementById('bottleImg');
+  const bTxt = document.getElementById('bStatusTxt');
+  const hint = document.getElementById('spinHint');
+
+  if (!enough) {
+    bImg.classList.add('disabled'); bTxt.style.display = 'block'; hint.style.display = 'none';
+    bTxt.innerHTML = 'İştirakçılar<br>gözlənilir…';
+  } else if (myTurn && !spinning) {
+    bImg.classList.remove('disabled'); bTxt.style.display = 'none'; hint.style.display = 'flex';
+  } else if (room.spin_in_progress) {
+    bImg.classList.add('disabled'); bTxt.style.display = 'none'; hint.style.display = 'none';
+  } else {
+    bImg.classList.add('disabled'); bTxt.style.display = 'none'; hint.style.display = 'none';
+    // Show whose turn it is
+    const turnP = players.find(p => p.slot === room.current_turn_slot);
+    if (turnP && turnP.id !== myId) {
+      bTxt.style.display = 'block';
+      bTxt.innerHTML = `${esc(turnP.display_name)}<br>fırladır…`;
+    }
+  }
+
+  // Clear slots
+  for (let i = 1; i <= 8; i++) {
+    const el = document.getElementById('pslot_' + i);
+    el.innerHTML = ''; el.className = 'pslot p' + i;
+  }
+
+  // Render players
+  players.forEach((p, idx) => {
+    const vs = (p.slot >= 1 && p.slot <= 8) ? p.slot : (idx % 8) + 1;
+    const el = document.getElementById('pslot_' + vs);
+    if (!el) return;
+
+    const isMe     = p.id === myId;
+    const isTurn   = p.slot === room.current_turn_slot && !room.spin_in_progress;
+    const isTarget = p.slot === room.spin_target_slot  &&  room.spin_in_progress;
+
+    if (isTurn)   el.classList.add('is-turn');
+    if (isTarget) el.classList.add('is-target');
+
+    const flower   = FLOWERS[Math.abs(hashStr(p.id)) % FLOWERS.length];
+    const initials = (p.display_name || '?').substring(0, 2).toUpperCase();
+    const photoHtml = p.photo
+      ? `<img src="${p.photo}" onerror="this.outerHTML='<span style=\\'font-size:19px;font-weight:900;color:${p.color||'#fff'};\\'>${initials}</span>'">`
+      : `<span style="font-size:19px;font-weight:900;color:${p.color||'#fff'}">${initials}</span>`;
+
+    const bBorder = isMe ? `border-color:gold;box-shadow:0 0 12px rgba(255,215,0,.55);` : `border-color:${p.color||'rgba(255,255,255,0.25)'};`;
+
+    el.innerHTML = `
+      <div class="avatar" style="${bBorder}">
+        ${photoHtml}
+        <div class="badge-top">${p.level||1}</div>
+        ${isMe?'<div class="online-badge"></div>':''}
+      </div>
+      <div class="flowers">${flower}</div>
+      <div class="uname">
+        ${isMe?'<i class="fa-solid fa-crown" style="color:gold;font-size:7px"></i>':''}
+        ${esc(p.display_name || '?')}
+      </div>`;
+  });
+}
+
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i);
+  return h | 0;
+}
+
+/* ════ SPIN ════ */
+function doSpin() {
+  if (spinning) { showToast('⏳ Artıq fırlayır!'); return; }
+  if (gameState.room?.spin_in_progress) { showToast('⏳ Artıq fırlayır!'); return; }
+  if (!gameState.players || gameState.players.length < 2) { showToast('🙋 Ən az 2 oyunçu lazım!'); return; }
+  click();
+  socket.emit('spin', { room_id: roomId });
+}
+
+function doBottleSpin(data) {
+  if (spinning) return;
+  spinning = true;
+  spinSnd();
+  document.getElementById('spinHint').style.display = 'none';
+  const bImg = document.getElementById('bottleImg');
+  bImg.classList.add('disabled');
+
+  const extra = data.angle || (1080 + Math.floor(Math.random() * 2880));
+  totalRot += extra;
+  bImg.style.transition = 'transform 4s cubic-bezier(0.15,0,0.15,1)';
+  bImg.style.transform  = `rotate(${totalRot}deg)`;
+
+  let ticks = 0;
+  const tickInt = setInterval(() => {
+    ticks++;
+    const prog = ticks / 33;
+    const spd  = Math.max(0, 1 - prog);
+    if (spd > 0.05) tone(150 + spd * 400, 'square', .03, .04 * spd);
+  }, 120);
+
+  setTimeout(() => {
+    clearInterval(tickInt);
+    spinning = false;
+    if (data.challenge) showChallenge(data);
+  }, 4200);
+}
+
+/* ════ CHALLENGE ════ */
+function showChallenge(data) {
+  const ch = data.challenge;
+  document.getElementById('chCat').textContent   = ch.cat;
+  document.getElementById('chTname').textContent = data.target_name || '?';
+  document.getElementById('chTitle').textContent = ch.text;
+  document.getElementById('chDesc').textContent  = ch.desc;
+  document.getElementById('chXP').textContent    = ch.xp;
+  document.getElementById('chBtns').style.display = data.spin_by === myId ? 'flex' : 'none';
+  notif(); confetti(true);
+  document.getElementById('challengeModal').classList.add('show');
+}
+function closeCh() { document.getElementById('challengeModal').classList.remove('show'); }
+function resolveCh(done) {
+  click();
+  socket.emit('challenge_done', { room_id: roomId, done });
+  closeCh();
+}
+
+/* ════ RESULT ════ */
+function showResult(data) {
+  closeCh();
+  document.getElementById('resIcon').textContent = data.done ? '🏆' : '💨';
+  document.getElementById('resText').textContent = data.done
+    ? (data.target_name || '?') + ' görəvi tamamladı!'
+    : (data.target_name || '?') + ' görəvdən keçdi!';
+  document.getElementById('resXP').textContent   = data.done ? '+' + (data.xp_gained || 20) + ' XP ⭐' : '';
+  data.done ? winSnd() : failSnd();
+  if (data.done) confetti(true);
+  document.getElementById('resultModal').classList.add('show');
+}
+function closeRes() { click(); document.getElementById('resultModal').classList.remove('show'); }
+
+/* ════ TABLE CHANGE ════ */
+function changeTable() {
+  if (timerRunning) return;
+  timerRunning = true; click();
+  const btn = document.getElementById('refreshBtn');
+  let c = 7;
+  btn.innerHTML = `<span style="font-size:12px;font-weight:800">${c}</span>`;
+  btn.style.background = 'rgba(255,60,0,.7)';
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) btn.innerHTML = `<span style="font-size:12px;font-weight:800">${c}</span>`;
+    else {
+      clearInterval(t);
+      btn.innerHTML = '<i class="fa-solid fa-rotate"></i>';
+      btn.style.background = '';
+      timerRunning = false;
+      // Rejoin with new room
+      if (socket?.connected) socket.emit('join_room', { game: 'sise' }, res => {
+        if (res?.ok) {
+          roomId = res.room_id; mySlot = res.slot;
+          document.getElementById('masaNum').textContent = res.code || '—';
+          showToast('🔄 Yeni masa!');
+        }
+      });
+    }
+  }, 1000);
+}
+
+/* ════ CHAT ════ */
+function sendMsg() {
+  const inp = document.getElementById('chatInp');
+  const txt = inp.value.trim();
+  if (!txt || !socket) return;
+  click();
+  socket.emit('msg', { text: txt, room_id: roomId });
+  inp.value = '';
+}
+
+function appendMsg(msg) {
+  const c = document.getElementById('chatMsgs');
+  const row = document.createElement('div');
+  if (msg.msg_type === 'system' || msg.type === 'system') {
+    row.className = 'msg-row system';
+    row.textContent = msg.body || msg.text || '';
+  } else {
+    row.className = 'msg-row';
+    const avt = msg.photo_url || msg.photo
+      ? `<img src="${msg.photo_url || msg.photo}" onerror="this.style.display='none'">`
+      : '<i class="fa-solid fa-user"></i>';
+    const col = msg.name_color || msg.color || '#3498db';
+    const name = esc(msg.username || msg.name || msg.uid || '?');
+    const body = esc(msg.body || msg.text || '');
+    row.innerHTML = `
+      <div class="msg-avt">${avt}</div>
+      <div class="msg-content">
+        <div class="msg-name" style="color:${col}">${name}</div>
+        <div class="msg-text">${body}</div>
+      </div>`;
+  }
+  c.appendChild(row);
+  c.scrollTop = c.scrollHeight;
+  while (c.children.length > 100) c.removeChild(c.firstChild);
+}
+
+/* ════ REACTIONS ════ */
+function sendReaction(emoji) {
+  click();
+  if (socket) socket.emit('reaction', { emoji, room_id: roomId });
+  spawnFloat(emoji);
+}
+function spawnFloat(emoji) {
+  const el = document.createElement('div');
+  el.className = 'float-r';
+  el.textContent = emoji;
+  el.style.left   = (10 + Math.random() * 65) + 'vw';
+  el.style.bottom = '28%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+/* ════ CONFETTI ════ */
+function confetti(win) {
+  const cols = win
+    ? ['#ff6b00','#ffd700','#ff4081','#00e676','#40c4ff','#fff','#ff8c00']
+    : ['#ef5350','#757575'];
+  for (let i = 0; i < 36; i++) {
+    const el = document.createElement('div');
+    el.className = 'cf-p';
+    el.style.left       = Math.random() * 100 + 'vw';
+    el.style.top        = '-10px';
+    el.style.background = cols[Math.floor(Math.random() * cols.length)];
+    el.style.setProperty('--d', (.6 + Math.random() * 1.3) + 's');
+    el.style.animationDelay = Math.random() * .4 + 's';
+    el.style.width  = (4 + Math.random() * 8) + 'px';
+    el.style.height = (4 + Math.random() * 8) + 'px';
+    el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2400);
+  }
+}
+
+/* ════ BOTTLE PICKER ════ */
+function openBottlePicker() {
+  const grid = document.getElementById('bpGrid');
+  grid.innerHTML = '';
+  BOTTLES.forEach(b => {
+    const d = document.createElement('div');
+    d.className = 'bp-item' + (myBottle === b.id ? ' sel' : '');
+    d.innerHTML = `<img src="${b.src}" alt="${b.name}"><span>${b.name}</span>`;
+    d.onclick = () => {
+      myBottle = b.id;
+      document.getElementById('bottleImg').src = b.src;
+      if (socket) socket.emit('set_bottle', { bottle_id: b.id });
+      click(); closeBp(); showToast('✅ Butulka dəyişdirildi!');
+    };
+    grid.appendChild(d);
+  });
+  document.getElementById('bpModal').classList.add('show');
+}
+function closeBp() { document.getElementById('bpModal').classList.remove('show'); }
+
+/* ════ LEADERBOARD ════ */
+function openLeaderboard() {
+  click();
+  const render = d => {
+    const list = document.getElementById('lbList');
+    const ranks = ['🥇','🥈','🥉'];
+    list.innerHTML = (d.leaders || []).slice(0, 15).map((u, i) => `
+      <div class="lb-item">
+        <div class="lb-rank">${ranks[i] || i + 1}</div>
+        <div class="lb-name" style="color:${u.color||'#333'}">${esc(u.display_name || u.username || '?')}
+          <div style="font-size:9px;color:#999;font-weight:400">Lv.${u.level||1} · ${u.wins||0} görəv</div>
+        </div>
+        <div class="lb-xp">${u.xp || 0} XP</div>
+      </div>`).join('');
+    document.getElementById('lbModal').classList.add('show');
+  };
+  if (socket?.connected) socket.emit('leaderboard', {}, render);
+  else fetch('/api/leaderboard').then(r => r.json()).then(render).catch(() => {});
+}
+function closeLb() { click(); document.getElementById('lbModal').classList.remove('show'); }
+
+/* ════ MODALS ════ */
+function openHeartModal()  { click(); document.getElementById('heartModal').classList.add('show'); }
+function closeHeart()      { document.getElementById('heartModal').classList.remove('show'); }
+function openSettingsMenu(){ click(); document.getElementById('settingsMenu').classList.add('show'); }
+function closeSettings()   { document.getElementById('settingsMenu').classList.remove('show'); }
+
+/* ════ TOAST ════ */
+let _tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  if (_tt) clearTimeout(_tt);
+  _tt = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
